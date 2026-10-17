@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Windfall</title>
+<title>Four Seasons</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3c6 5 10 10 8 16-1 4-5 7-8 10-3-3-7-6-8-10-2-6 2-11 8-16z' fill='%23e4572e'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,7 +72,7 @@
   .kicker { font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ochre); margin: 0 0 1.1rem; }
   h1 {
     margin: 0; font-family: var(--display); font-weight: 400;
-    font-size: clamp(3.4rem, 8.6vw, 8.4rem); line-height: .86; letter-spacing: -.035em;
+    font-size: clamp(3.2rem, 8vw, 7.6rem); line-height: .9; letter-spacing: -.035em;
     color: var(--paper); position: relative; width: fit-content;
   }
   h1 .fall { color: var(--accent); }
@@ -171,7 +171,7 @@
   <div class="start-grid">
     <div>
       <p class="kicker rise d1" id="kicker">a small autumn for your webcam</p>
-      <h1 class="rise">Wind<span class="fall">fall</span>
+      <h1 class="rise">Four<br><span class="fall">Seasons</span>
         <svg viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 20 C 60 4, 110 4, 150 16 S 215 28, 250 16 S 300 2, 330 12 C 350 19, 340 26, 326 20 S 340 6, 396 10"/></svg>
       </h1>
       <div class="seasons rise d2" id="pick" role="radiogroup" aria-label="Season"></div>
@@ -513,7 +513,7 @@ for (const id of ORDER) SEASONS[id].id = id;
 function defaultSeason() {
   const h = location.hash.slice(1);
   if (SEASONS[h]) return h;
-  try { const s = localStorage.getItem('windfall-season'); if (SEASONS[s]) return s; } catch (e) { /* storage blocked */ }
+  try { const s = localStorage.getItem('four-seasons-season'); if (SEASONS[s]) return s; } catch (e) { /* storage blocked */ }
   const m = new Date().getMonth();
   return m <= 1 || m === 11 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn';
 }
@@ -1222,7 +1222,7 @@ function drawRing() {
 function savePNG() {
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
-  a.download = 'windfall-' + S.id + '-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
+  a.download = 'four-seasons-' + S.id + '-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
   document.body.appendChild(a); a.click(); a.remove();
   flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
 }
@@ -1374,7 +1374,7 @@ function setSeason(id, first) {
   slabel.textContent = S.word; sizeEl.setAttribute('aria-label', S.word + ' density');
   for (const btn of document.querySelectorAll('[data-season]')) btn.setAttribute('aria-checked', String(btn.dataset.season === id));
   buildVig(); buildDrift();
-  try { localStorage.setItem('windfall-season', id); } catch (e) { /* storage blocked */ }
+  try { localStorage.setItem('four-seasons-season', id); } catch (e) { /* storage blocked */ }
   if (running) { resetWorld(); swapT = 0.6; setStatus(handsReady ? readyText() : S.load); }
   else setStatus(S.load);
 }
@@ -1394,7 +1394,7 @@ function describe(e) {
 async function begin() {
   errEl.hidden = true; goBtn.disabled = true;
   if (location.protocol === 'file:') {
-    return showError('Browsers block the camera on file:// pages. Serve this folder instead, e.g. run "python3 -m http.server 8000" here and open http://localhost:8000/windfall.html');
+    return showError('Browsers block the camera on file:// pages. Serve this folder instead, e.g. run "python3 -m http.server 8000" here and open http://localhost:8000/four-seasons.html');
   }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     return showError('This page needs https or localhost to reach the camera.');

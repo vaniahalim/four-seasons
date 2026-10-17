@@ -1,4 +1,4 @@
-# Windfall
+# Four Seasons
 
 Four seasons you play with using your webcam and breath, in a single HTML file.
 
@@ -38,7 +38,7 @@ There is no build step. Serve the folder and open the page:
 python3 -m http.server 8765
 ```
 
-Then open <http://localhost:8765/windfall.html> in a recent Chrome and allow camera and microphone access.
+Then open <http://localhost:8765/four-seasons.html> in a recent Chrome and allow camera and microphone access.
 
 Browsers only allow camera and microphone access on `localhost` or HTTPS, so opening the file directly from disk will not work.
 
@@ -51,4 +51,4 @@ Browsers only allow camera and microphone access on `localhost` or HTTPS, so ope
 
 ## Files
 
-- `windfall.html`: the whole app
+- `four-seasons.html`: the whole app
