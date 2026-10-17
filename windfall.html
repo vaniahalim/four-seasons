@@ -17,11 +17,17 @@
     --rust: #b7471f;
     --accent: #e4572e;
     --dust: #c9b49a;
+    --on-accent: #1a0d08;
+    --glow1: rgba(220,155,44,.22);
+    --glow2: rgba(183,71,31,.20);
     --glass: rgba(255,244,225,.14);
     --glass-line: rgba(255,240,215,.40);
     --display: "Young Serif", "Iowan Old Style", Georgia, serif;
     --body: "Hanken Grotesk", "Avenir Next", "Helvetica Neue", sans-serif;
   }
+  :root[data-season="spring"] { --ink:#1b1420; --ink-2:#2c1b2d; --paper:#fbeee6; --ochre:#a8d672; --rust:#c9557a; --accent:#e8718f; --dust:#cdb9c0; --on-accent:#25101a; --glow1:rgba(168,214,114,.20); --glow2:rgba(232,113,143,.22); }
+  :root[data-season="summer"] { --ink:#1a1710; --ink-2:#2c2410; --paper:#fbf0cf; --ochre:#f2c04b; --rust:#c46a12; --accent:#f58a1f; --dust:#d2c391; --on-accent:#1f1204; --glow1:rgba(242,192,75,.26); --glow2:rgba(110,170,80,.20); }
+  :root[data-season="winter"] { --ink:#0f1822; --ink-2:#17283b; --paper:#e9f4fb; --ochre:#9fd6f0; --rust:#5b8bc0; --accent:#7cc4ee; --dust:#a9bfcc; --on-accent:#06141f; --glow1:rgba(159,214,240,.20); --glow2:rgba(110,140,210,.22); }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html, body { margin: 0; height: 100%; background: var(--ink); color: var(--paper); font-family: var(--body); overflow: hidden; }
@@ -35,8 +41,8 @@
     display: grid; align-content: center;
     padding: clamp(24px, 6vw, 88px);
     background:
-      radial-gradient(55vmax 40vmax at 85% 6%, rgba(220,155,44,.22), transparent 62%),
-      radial-gradient(60vmax 45vmax at 6% 100%, rgba(183,71,31,.20), transparent 60%),
+      radial-gradient(55vmax 40vmax at 85% 6%, var(--glow1), transparent 62%),
+      radial-gradient(60vmax 45vmax at 6% 100%, var(--glow2), transparent 60%),
       linear-gradient(170deg, var(--ink-2), var(--ink));
   }
   #start::before {
@@ -47,6 +53,12 @@
   #drift img {
     position: absolute; top: 0; opacity: .9; will-change: transform;
     animation: drift var(--dur) linear var(--delay) infinite backwards;
+  }
+  #drift.up img { animation-name: float; }
+  @keyframes float {
+    0%   { transform: translate3d(0, 112vh, 0) rotate(0deg); }
+    50%  { transform: translate3d(var(--sx), 50vh, 0) rotate(24deg); }
+    100% { transform: translate3d(calc(var(--sx) * -.5), -20vh, 0) rotate(-12deg); }
   }
   @keyframes drift {
     0%   { transform: translate3d(0, -20vh, 0) rotate(0deg); }
@@ -68,24 +80,35 @@
   h1 path { fill: none; stroke: var(--ochre); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 800; stroke-dashoffset: 800; animation: draw 1.8s .6s cubic-bezier(.6,.1,.2,1) forwards; }
   @keyframes draw { to { stroke-dashoffset: 0; } }
   .right { padding-bottom: .5rem; }
-  .right p.lede { margin: 0 0 1.3rem; line-height: 1.55; color: #e6d6bd; max-width: 38ch; font-size: 1.05rem; }
-  .how { list-style: none; counter-reset: s; padding: 0; margin: 0 0 2rem; border-top: 1px solid rgba(244,231,208,.2); }
-  .how li { counter-increment: s; display: grid; grid-template-columns: 1.6rem 5.4rem 1fr; padding: .6rem 0; border-bottom: 1px solid rgba(244,231,208,.2); font-size: .94rem; }
+  .right p.lede { margin: 0 0 1.3rem; line-height: 1.55; color: color-mix(in srgb, var(--paper) 88%, transparent); max-width: 38ch; font-size: 1.05rem; }
+  .how { list-style: none; counter-reset: s; padding: 0; margin: 0 0 2rem; border-top: 1px solid color-mix(in srgb, var(--paper) 20%, transparent); }
+  .how li { counter-increment: s; display: grid; grid-template-columns: 1.6rem 5.4rem 1fr; padding: .6rem 0; border-bottom: 1px solid color-mix(in srgb, var(--paper) 20%, transparent); font-size: .94rem; }
   .how li::before { content: counter(s, decimal-leading-zero); color: var(--ochre); font-size: .72rem; padding-top: .18rem; }
   .how b { font-weight: 600; }
-  .how span { color: #cdbb9f; }
+  .how span { color: var(--dust); }
   #go {
     font: 600 1rem var(--body); cursor: pointer;
-    background: var(--accent); color: #1a0d08; border: 0; border-radius: 2px;
+    background: var(--accent); color: var(--on-accent); border: 0; border-radius: 2px;
     padding: 1rem 1.6rem; display: inline-flex; gap: .8rem; align-items: center;
     transition: transform .18s ease, background .18s ease;
   }
-  #go:hover { background: #f06b40; transform: translateX(3px); }
-  #go:focus-visible, #shutter:focus-visible, #leaves input:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+  #go:hover { filter: brightness(1.1); transform: translateX(3px); }
+  #go:focus-visible, #shutter:focus-visible, #leaves input:focus-visible, .seasons button:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
   #go:disabled { opacity: .6; cursor: progress; transform: none; }
   .privacy { margin: 1.3rem 0 0; font-size: .86rem; color: var(--dust); max-width: 44ch; line-height: 1.5; }
   .privacy::before { content: ""; display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; background: var(--ochre); margin-right: .6rem; }
-  #err { margin: 1.1rem 0 0; padding: .8rem 1rem; border-left: 3px solid var(--accent); background: rgba(228,87,46,.14); color: var(--paper); font-size: .92rem; line-height: 1.45; max-width: 48ch; }
+  #err { margin: 1.1rem 0 0; padding: .8rem 1rem; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--paper); font-size: .92rem; line-height: 1.45; max-width: 48ch; }
+
+  .seasons { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 2.1rem; }
+  .seasons button, #seasons button {
+    font: 500 .88rem var(--body); cursor: pointer; color: var(--paper); background: transparent;
+    border: 1px solid color-mix(in srgb, var(--paper) 30%, transparent); border-radius: 999px;
+    padding: .5rem .95rem .5rem .8rem; display: inline-flex; align-items: center; gap: .5rem;
+    transition: background .18s, color .18s, border-color .18s;
+  }
+  .seasons button i, #seasons button i { width: .55rem; height: .55rem; border-radius: 50%; background: var(--sw); flex: none; }
+  .seasons button:hover { border-color: var(--paper); }
+  .seasons button[aria-checked="true"] { background: var(--paper); color: var(--ink); border-color: var(--paper); }
 
   .rise { opacity: 0; transform: translateY(14px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
   .rise.d1 { animation-delay: .1s; } .rise.d2 { animation-delay: .35s; } .rise.d3 { animation-delay: .55s; }
@@ -113,6 +136,12 @@
   .round:hover { transform: scale(1.06); }
   .round:active { transform: scale(.94); }
   #shutter { right: 20px; }
+  #seasons { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 5; display: flex; gap: 4px; padding: 5px; border-radius: 999px; }
+  #seasons button { border-color: transparent; color: #fff; padding: .42rem .8rem .42rem .65rem; font-size: .8rem; }
+  #seasons button:hover { background: rgba(255,255,255,.14); }
+  #seasons button[aria-checked="true"] { background: rgba(255,255,255,.9); color: #14141a; }
+  #seasons button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  @media (max-width: 760px) { #seasons button span { display: none; } #seasons button { padding: .55rem; } }
   #flash { position: fixed; inset: 0; background: #fff4de; z-index: 6; pointer-events: none; opacity: 0; }
   #flash.on { animation: flash .35s ease-out; }
   @keyframes flash { 0% { opacity: .7; } 100% { opacity: 0; } }
@@ -127,33 +156,29 @@
   <div><span class="dot" id="dot"></span><span id="status">waking the orchard…</span></div>
   <div id="hint">blow to send a gust · open palm catches · pinch a leaf to lift it · fist sweeps · space gusts · c clears the floor · s saves</div>
 </div>
-<label id="leaves" class="glass" hidden><span>leaves</span><input id="size" type="range" min="7" max="38" step="1" value="15" aria-label="leaf density"></label>
+<label id="leaves" class="glass" hidden><span id="slabel">leaves</span><input id="size" type="range" min="7" max="38" step="1" value="15" aria-label="leaf density"></label>
 <button id="shutter" class="round glass" type="button" aria-label="Save a photo" hidden>
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="9.5"/>
     <path d="M12 2.5 15.6 9M21 8.2 14.2 9.6M21.2 15.5 15 12.3M12 21.5 8.4 15M3 15.8 9.8 14.4M2.8 8.5 9 11.7"/>
   </svg>
 </button>
+<div id="seasons" class="glass" role="radiogroup" aria-label="Season" hidden></div>
 <div id="flash"></div>
 
 <section id="start">
   <div id="drift" aria-hidden="true"></div>
   <div class="start-grid">
     <div>
-      <p class="kicker rise d1">a small autumn for your webcam</p>
+      <p class="kicker rise d1" id="kicker">a small autumn for your webcam</p>
       <h1 class="rise">Wind<span class="fall">fall</span>
         <svg viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 20 C 60 4, 110 4, 150 16 S 215 28, 250 16 S 300 2, 330 12 C 350 19, 340 26, 326 20 S 340 6, 396 10"/></svg>
       </h1>
+      <div class="seasons rise d2" id="pick" role="radiogroup" aria-label="Season"></div>
     </div>
     <div class="right">
-      <p class="lede rise d2">Leaves fall through your camera and you're standing in them. Blow and they scatter. Hold out a hand and they land. Pick one up, throw it, or sweep the floor.</p>
-      <ul class="how rise d2">
-        <li><b>Blow</b><span>a gust leaves your mouth and scatters them</span></li>
-        <li><b>Palm</b><span>hold a hand open to catch a few, flick to toss</span></li>
-        <li><b>Pinch</b><span>lift one leaf, carry it, let it go</span></li>
-        <li><b>Fist</b><span>sweep the floor and the piles go flying</span></li>
-        <li><b>Space</b><span>hold for a silent gust</span></li>
-      </ul>
+      <p class="lede rise d2" id="lede"></p>
+      <ul class="how rise d2" id="how"></ul>
       <div class="rise d3">
         <button id="go" type="button">Step outside <span aria-hidden="true">→</span></button>
         <p class="privacy">Everything runs in this browser tab. No frames, audio or data ever leave your machine, and nothing is uploaded or recorded. Needs camera and microphone.</p>
@@ -169,44 +194,53 @@
 'use strict';
 
 // ---------------------------------------------------------------- constants
-const GRADE = 'sepia(0.32) saturate(1.18) contrast(1.05) brightness(0.96)';
-const WASH = 'rgba(255,168,64,0.10)';
 const PINCH_DOWN = 0.22, PINCH_UP = 0.38;
 const EASE_FACE = 0.4;
-const PER_STEP = 12;                 // slider value * this = leaves aloft
+const PER_STEP = 12;                 // slider value * this * season density = bits aloft
 const MAX_LEAVES = 900, MAX_REST = 480, MAX_PILE = 0.16;
 const GUST_ACC = 1100;               // px/s^2 at full breath, right at the mouth
 const TOSS = 2.4;                    // palm speed (hand-widths per second) that flings its leaves
-const MAX_PALM = 18, MAX_HEAD = 7;
+const MAX_PALM = 18, MAX_HEAD = 7, MAX_BLOOMS = 40, MAX_FROST = 36;
+const BREEZE = 24;                   // px/s, the summer drift of dandelion seeds
 const HANDS_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/';
 const FACE_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/';
 const TAU = Math.PI * 2;
 const FALL = 0, REST = 1, HELD = 2, PALM = 3, HEAD = 4;
+const K_BIT = 0, K_BFLY = 1, K_FLY = 2;     // what a bit is: leaf/petal/flake/seed, butterfly, firefly
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const angDiff = (a, b) => ((a - b + Math.PI) % TAU + TAU) % TAU - Math.PI;
 
 // ---------------------------------------------------------------- elements
 const $ = id => document.getElementById(id);
 const canvas = $('scene'), ctx = canvas.getContext('2d');
 const cam = $('cam'), startEl = $('start'), goBtn = $('go'), errEl = $('err');
-const hud = $('hud'), statusEl = $('status'), dotEl = $('dot');
-const leavesEl = $('leaves'), sizeEl = $('size'), shutter = $('shutter'), flash = $('flash');
+const hud = $('hud'), statusEl = $('status'), dotEl = $('dot'), hintEl = $('hint');
+const leavesEl = $('leaves'), sizeEl = $('size'), slabel = $('slabel'), shutter = $('shutter'), flash = $('flash');
+const seasonsEl = $('seasons'), pickEl = $('pick');
 const vig = document.createElement('canvas');
+const fogS = document.createElement('canvas'), fogCtx = fogS.getContext('2d');
 const HAS_FILTER = 'filter' in ctx;
 
-// ---------------------------------------------------------------- leaf sprites
-const PALETTE = ['#c2411d', '#e0a030', '#d4741a', '#9e2b25', '#b3a032', '#7a3b2e'];
-const SHAPES = ['maple', 'oak', 'ginkgo', 'birch'];
-const SPR = [];
-
+// ---------------------------------------------------------------- sprites
 function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
 function mixHex(a, b, t) {
   const A = hexToRgb(a), B = hexToRgb(b);
   return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')';
 }
-// unit-space outlines (roughly -1..1), stem pointing down
+function spriteCanvas() {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.translate(64, 64); g.scale(60, 60);
+  g.lineJoin = g.lineCap = 'round';
+  return [c, g];
+}
+
+// ---- autumn: leaves. unit-space outlines (roughly -1..1), stem pointing down
+const PALETTE = ['#c2411d', '#e0a030', '#d4741a', '#9e2b25', '#b3a032', '#7a3b2e'];
+const SHAPES = ['maple', 'oak', 'ginkgo', 'birch'];
 function outline(shape) {
   const pts = [], veins = [];
   let stem = [0, 0.55, 0, 0.95];
@@ -249,11 +283,8 @@ function outline(shape) {
   }
   return { pts, veins, stem };
 }
-function makeSprite(shape, base) {
-  const c = document.createElement('canvas'); c.width = c.height = 128;
-  const g = c.getContext('2d');
-  g.translate(64, 64); g.scale(60, 60);
-  g.lineJoin = g.lineCap = 'round';
+function makeLeaf(shape, base) {
+  const [c, g] = spriteCanvas();
   const o = outline(shape), dark = '#2a140c';
   g.strokeStyle = mixHex(base, dark, 0.45); g.lineWidth = 0.05;
   g.beginPath(); g.moveTo(o.stem[0], o.stem[1]); g.lineTo(o.stem[2], o.stem[3]); g.stroke();
@@ -270,27 +301,226 @@ function makeSprite(shape, base) {
   for (const v of o.veins) { g.beginPath(); g.moveTo(v[0], v[1]); g.lineTo(v[2], v[3]); g.stroke(); }
   return c;
 }
-for (const shape of SHAPES) for (const col of PALETTE) SPR.push(makeSprite(shape, col));
+const SPR_AUTUMN = [];
+for (const shape of SHAPES) for (const col of PALETTE) SPR_AUTUMN.push(makeLeaf(shape, col));
 
-// drifting leaves behind the start screen
-(function buildDrift() {
-  const box = $('drift');
-  for (let i = 0; i < 18; i++) {
-    const img = new Image();
-    img.src = SPR[(Math.random() * SPR.length) | 0].toDataURL();
-    const sz = rand(26, 74);
-    img.width = img.height = sz;
-    img.style.left = rand(-4, 100) + 'vw';
-    img.style.setProperty('--sx', rand(-18, 18) + 'vw');
-    img.style.setProperty('--dur', rand(16, 30) + 's');
-    img.style.setProperty('--delay', (-rand(0, 28)) + 's');
-    img.alt = '';
-    box.appendChild(img);
+// ---- spring: blossoms and single petals, one of each per colour
+const BLOOM_COLS = ['#f7b6c8', '#f48fb1', '#fde2ea', '#e9a3d4', '#fff6f8', '#ffc9a8'];
+function makeBlossom(base) {
+  const [c, g] = spriteCanvas();
+  for (let i = 0; i < 5; i++) {
+    g.save(); g.rotate(i * TAU / 5);
+    g.beginPath();
+    g.moveTo(0, -0.04);
+    g.bezierCurveTo(-0.46, -0.32, -0.34, -0.86, -0.08, -0.92);
+    g.lineTo(0, -0.8);
+    g.lineTo(0.08, -0.92);
+    g.bezierCurveTo(0.34, -0.86, 0.46, -0.32, 0, -0.04);
+    g.closePath();
+    const grd = g.createLinearGradient(0, 0, 0, -0.92);
+    grd.addColorStop(0, mixHex(base, '#b0235a', 0.5));
+    grd.addColorStop(0.45, base);
+    grd.addColorStop(1, mixHex(base, '#ffffff', 0.5));
+    g.fillStyle = grd; g.fill();
+    g.strokeStyle = mixHex(base, '#6e1c44', 0.4); g.lineWidth = 0.02; g.stroke();
+    g.restore();
   }
-})();
+  g.fillStyle = '#f4c542';
+  for (let i = 0; i < 9; i++) { const a = i * TAU / 9; g.beginPath(); g.arc(Math.cos(a) * 0.17, Math.sin(a) * 0.17, 0.034, 0, TAU); g.fill(); }
+  g.fillStyle = '#c4572d'; g.beginPath(); g.arc(0, 0, 0.07, 0, TAU); g.fill();
+  return c;
+}
+function makePetal(base) {
+  const [c, g] = spriteCanvas();
+  g.beginPath();
+  g.moveTo(0, 0.82);
+  g.bezierCurveTo(-0.58, 0.36, -0.5, -0.56, -0.1, -0.84);
+  g.lineTo(0, -0.7);
+  g.lineTo(0.1, -0.84);
+  g.bezierCurveTo(0.5, -0.56, 0.58, 0.36, 0, 0.82);
+  g.closePath();
+  const grd = g.createLinearGradient(0, 0.82, 0, -0.84);
+  grd.addColorStop(0, mixHex(base, '#b0235a', 0.45));
+  grd.addColorStop(0.5, base);
+  grd.addColorStop(1, mixHex(base, '#ffffff', 0.55));
+  g.fillStyle = grd; g.fill();
+  g.strokeStyle = mixHex(base, '#6e1c44', 0.4); g.lineWidth = 0.025; g.stroke();
+  g.globalAlpha = 0.4; g.lineWidth = 0.02;
+  g.beginPath(); g.moveTo(0, 0.7); g.lineTo(0, -0.5); g.stroke();
+  return c;
+}
+const SPR_SPRING = [...BLOOM_COLS.map(makeBlossom), ...BLOOM_COLS.map(makePetal)];   // 0-5 blossoms, 6-11 petals
+
+// ---- winter: snow crystals (also used, bigger and finer, as frost on the glass)
+function branch(g, x, y, a, len, depth, ts, ls) {
+  const x2 = x + Math.cos(a) * len, y2 = y + Math.sin(a) * len;
+  g.beginPath(); g.moveTo(x, y); g.lineTo(x2, y2); g.stroke();
+  if (depth <= 0) return;
+  for (let i = 0; i < ts.length; i++) {
+    const bx = x + (x2 - x) * ts[i], by = y + (y2 - y) * ts[i], bl = len * ls[i];
+    branch(g, bx, by, a + Math.PI / 3, bl, depth - 1, ts, ls);
+    branch(g, bx, by, a - Math.PI / 3, bl, depth - 1, ts, ls);
+  }
+}
+function makeCrystal(ts, ls, depth, plate, rgb, glow, w) {
+  const [c, g] = spriteCanvas();
+  g.strokeStyle = 'rgb(' + rgb + ')'; g.fillStyle = 'rgba(' + rgb + ',0.25)';
+  g.shadowColor = glow; g.shadowBlur = 4; g.lineWidth = w;
+  if (plate) {
+    g.beginPath();
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; k ? g.lineTo(Math.cos(a) * 0.34, Math.sin(a) * 0.34) : g.moveTo(0.34, 0); }
+    g.closePath(); g.fill(); g.stroke();
+  }
+  for (let k = 0; k < 6; k++) branch(g, 0, 0, k * Math.PI / 3, 0.92, depth, ts, ls);
+  return c;
+}
+function makePuff() {
+  const [c, g] = spriteCanvas();
+  const grd = g.createRadialGradient(0, 0, 0, 0, 0, 0.8);
+  grd.addColorStop(0, 'rgba(250,253,255,0.95)'); grd.addColorStop(0.5, 'rgba(232,244,255,0.55)'); grd.addColorStop(1, 'rgba(220,238,255,0)');
+  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, 0.8, 0, TAU); g.fill();
+  return c;
+}
+const SNOW = '240,248,255', SNOW_GLOW = 'rgba(40,80,130,0.6)';
+const SPR_WINTER = [
+  makeCrystal([0.35, 0.62], [0.32, 0.22], 1, false, SNOW, SNOW_GLOW, 0.075),
+  makeCrystal([0.3, 0.5, 0.72], [0.34, 0.3, 0.2], 1, false, SNOW, SNOW_GLOW, 0.07),
+  makeCrystal([0.5], [0.38], 1, true, SNOW, SNOW_GLOW, 0.075),
+  makeCrystal([0.4, 0.7], [0.3, 0.2], 1, true, SNOW, SNOW_GLOW, 0.07),
+  makeCrystal([0.33, 0.58], [0.3, 0.28], 2, false, SNOW, SNOW_GLOW, 0.06),
+  makePuff(), makePuff()
+];
+const FROST = [
+  makeCrystal([0.28, 0.5, 0.72], [0.42, 0.34, 0.22], 2, false, '236,246,255', 'rgba(150,200,245,0.95)', 0.05),
+  makeCrystal([0.35, 0.6], [0.4, 0.3], 3, false, '236,246,255', 'rgba(150,200,245,0.95)', 0.04),
+  makeCrystal([0.22, 0.4, 0.58, 0.76], [0.3, 0.3, 0.25, 0.18], 2, true, '236,246,255', 'rgba(150,200,245,0.95)', 0.045),
+  makeCrystal([0.3, 0.55, 0.8], [0.36, 0.3, 0.2], 3, false, '230,244,255', 'rgba(150,200,245,0.95)', 0.035)
+];
+
+// ---- summer: dandelion seeds, butterflies, and a firefly glow
+function makeSeed() {
+  const [c, g] = spriteCanvas();
+  g.shadowColor = 'rgba(70,60,30,0.6)'; g.shadowBlur = 3;
+  const hx = 0, hy = 0.05;
+  g.strokeStyle = 'rgba(255,255,255,0.92)'; g.lineWidth = 0.018;
+  g.fillStyle = 'rgba(255,255,255,0.9)';
+  for (let i = 0; i < 22; i++) {
+    const a = -Math.PI * 0.96 + Math.PI * 0.92 * i / 21, L = rand(0.72, 0.9);
+    const x = hx + Math.cos(a) * L, y = hy + Math.sin(a) * L;
+    g.beginPath(); g.moveTo(hx, hy); g.lineTo(x, y); g.stroke();
+    g.beginPath(); g.arc(x, y, 0.04, 0, TAU); g.fill();
+  }
+  g.strokeStyle = '#d9cfae'; g.lineWidth = 0.03;
+  g.beginPath(); g.moveTo(hx, hy); g.lineTo(0, 0.88); g.stroke();
+  g.fillStyle = '#8a7350'; g.beginPath(); g.ellipse(0, 0.92, 0.05, 0.1, 0, 0, TAU); g.fill();
+  return c;
+}
+function makeButterfly(main, light, edge, dot) {
+  const [c, g] = spriteCanvas();
+  for (const m of [1, -1]) {
+    g.save(); g.scale(m, 1);
+    g.beginPath();
+    g.moveTo(0.03, -0.1); g.bezierCurveTo(0.35, -0.98, 1.0, -0.82, 0.92, -0.26); g.bezierCurveTo(0.88, 0.02, 0.4, 0.06, 0.03, -0.02);
+    g.closePath();
+    let grd = g.createRadialGradient(0.1, -0.1, 0.05, 0.1, -0.1, 0.95);
+    grd.addColorStop(0, light); grd.addColorStop(0.6, main); grd.addColorStop(1, mixHex(main, edge, 0.55));
+    g.fillStyle = grd; g.fill(); g.strokeStyle = edge; g.lineWidth = 0.05; g.stroke();
+    g.beginPath();
+    g.moveTo(0.03, 0.0); g.bezierCurveTo(0.5, 0.0, 0.82, 0.26, 0.62, 0.64); g.bezierCurveTo(0.46, 0.88, 0.12, 0.62, 0.03, 0.14);
+    g.closePath();
+    grd = g.createRadialGradient(0.1, 0.2, 0.05, 0.1, 0.2, 0.7);
+    grd.addColorStop(0, light); grd.addColorStop(0.7, main); grd.addColorStop(1, mixHex(main, edge, 0.5));
+    g.fillStyle = grd; g.fill(); g.stroke();
+    g.strokeStyle = edge; g.lineWidth = 0.022; g.globalAlpha = 0.7;
+    for (const v of [[0.2, -0.82], [0.62, -0.7], [0.82, -0.34], [0.45, 0.4], [0.55, 0.6]]) { g.beginPath(); g.moveTo(0.04, -0.03); g.lineTo(v[0], v[1]); g.stroke(); }
+    g.globalAlpha = 1; g.fillStyle = dot;
+    for (const d of [[0.82, -0.5], [0.7, -0.68], [0.5, -0.82], [0.58, 0.62]]) { g.beginPath(); g.arc(d[0] * 0.98, d[1], 0.045, 0, TAU); g.fill(); }
+    g.restore();
+  }
+  g.strokeStyle = '#1d1208'; g.lineWidth = 0.075;
+  g.beginPath(); g.moveTo(0, -0.34); g.lineTo(0, 0.52); g.stroke();
+  g.lineWidth = 0.025;
+  g.beginPath(); g.moveTo(0, -0.34); g.quadraticCurveTo(-0.1, -0.6, -0.22, -0.66); g.moveTo(0, -0.34); g.quadraticCurveTo(0.1, -0.6, 0.22, -0.66); g.stroke();
+  return c;
+}
+function makeGlow() {
+  const [c, g] = spriteCanvas();
+  const grd = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+  grd.addColorStop(0, 'rgba(255,252,210,1)'); grd.addColorStop(0.12, 'rgba(255,236,120,0.95)');
+  grd.addColorStop(0.35, 'rgba(255,210,70,0.4)'); grd.addColorStop(1, 'rgba(255,190,50,0)');
+  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill();
+  return c;
+}
+const SPR_SUMMER = [
+  makeSeed(), makeSeed(), makeSeed(),                                                               // 0-2 seeds
+  makeButterfly('#e8741c', '#ffb45a', '#2a1608', '#ffffff'),                                       // 3-6 butterflies
+  makeButterfly('#3d8fe0', '#bfe3ff', '#10223d', '#e8f4ff'),
+  makeButterfly('#f7d23a', '#fff4a8', '#3a2a08', '#3a2a08'),
+  makeButterfly('#fbf2f4', '#ffffff', '#5a4a66', '#c9a6d8'),
+  makeGlow()                                                                                        // 7 firefly
+];
+
+// ---------------------------------------------------------------- the four seasons
+const SEASONS = {
+  spring: {
+    name: 'Spring', sw: '#e8718f', spr: SPR_SPRING, word: 'petals',
+    kicker: 'a small spring for your webcam',
+    lede: 'Blossom petals loosen and drift through your camera. Hold out a hand and flowers push up from the ground toward it. Blow on one and it loses its petals, one by one.',
+    how: [['Blow', 'shake petals loose and scatter them'], ['Palm', 'hold it open: petals land, flowers rise to meet it'], ['Pinch', 'lift one petal, carry it, let it go'], ['Fist', 'sweep the meadow and the blooms burst'], ['Space', 'hold for a silent gust']],
+    hint: 'open palm: petals land and flowers rise · blow on a bloom to shake its petals loose · pinch a petal to lift it · fist sweeps · space gusts · c clears · s saves · 1–4 change season',
+    load: 'waking the meadow…', ready: 'ready — blow on a blossom',
+    grade: 'saturate(1.12) brightness(1.06) contrast(0.98)', wash: 'rgba(255,190,215,0.10)', vig: '40,22,44', glow: '255,214,230', ember: ['255,214,230', '240,120,160'],
+    density: 1, size: 0.82, fall: 0.72, flutter: 1.4, pile: 1, wander: false, lands: true, blooms: true,
+    pick: () => Math.random() < 0.3 ? { spr: (Math.random() * 6) | 0, kind: K_BIT, sz: 1.2 } : { spr: 6 + ((Math.random() * 6) | 0), kind: K_BIT, sz: 1 }
+  },
+  summer: {
+    name: 'Summer', sw: '#f2c04b', spr: SPR_SUMMER, word: 'flutter',
+    kicker: 'a small summer for your webcam',
+    lede: "It's golden hour on the trail. Dandelion seeds drift past, butterflies wander through, and the fireflies come out. Hold a hand still and they gather. Blow and make a wish.",
+    how: [['Blow', 'send the dandelion seeds flying'], ['Palm', 'hold it open and butterflies come to land'], ['Still', 'keep your hand quiet and fireflies drift in to circle it'], ['Pinch', 'hold one seed or butterfly gently'], ['Fist', 'shoo everything away'], ['Space', 'hold for a silent gust']],
+    hint: 'hold a hand open and still: butterflies land, fireflies gather · blow to scatter the seeds · pinch to hold one · fist shoos · space gusts · s saves · 1–4 change season',
+    load: 'finding the trail…', ready: 'ready — blow on the seeds',
+    grade: 'saturate(1.25) brightness(1.04) contrast(1.04) sepia(0.14)', wash: 'rgba(255,196,80,0.13)', vig: '34,24,6', glow: '255,226,120', ember: ['255,240,150', '255,160,40'],
+    density: 0.45, size: 1, fall: 0, flutter: 1, pile: 1, wander: true, lands: false, rays: true,
+    pick: () => { const r = Math.random(); return r < 0.6 ? { spr: (Math.random() * 3) | 0, kind: K_BIT, sz: 0.95 } : r < 0.84 ? { spr: 3 + ((Math.random() * 4) | 0), kind: K_BFLY, sz: 1.35 } : { spr: 7, kind: K_FLY, sz: 0.45 }; }
+  },
+  autumn: {
+    name: 'Autumn', sw: '#e4572e', spr: SPR_AUTUMN, word: 'leaves',
+    kicker: 'a small autumn for your webcam',
+    lede: "Leaves fall through your camera and you're standing in them. Blow and they scatter. Hold out a hand and they land. Pick one up, throw it, or sweep the floor.",
+    how: [['Blow', 'a gust leaves your mouth and scatters them'], ['Palm', 'hold a hand open to catch a few, flick to toss'], ['Pinch', 'lift one leaf, carry it, let it go'], ['Fist', 'sweep the floor and the piles go flying'], ['Space', 'hold for a silent gust']],
+    hint: 'blow to send a gust · open palm catches · pinch a leaf to lift it · fist sweeps · space gusts · c clears the floor · s saves · 1–4 change season',
+    load: 'waking the orchard…', ready: 'ready — blow on the leaves',
+    grade: 'sepia(0.32) saturate(1.18) contrast(1.05) brightness(0.96)', wash: 'rgba(255,168,64,0.10)', vig: '26,8,16', glow: '255,190,90', ember: ['255,196,110', '228,87,46'],
+    density: 1, size: 1, fall: 1, flutter: 1, pile: 1, wander: false, lands: true,
+    pick: () => ({ spr: (Math.random() * SPR_AUTUMN.length) | 0, kind: K_BIT, sz: 1 })
+  },
+  winter: {
+    name: 'Winter', sw: '#7cc4ee', spr: SPR_WINTER, word: 'snow',
+    kicker: 'a small winter for your webcam',
+    lede: 'Snow falls and the glass fogs over. Breathe on it and the fog creeps in. Pinch your finger through it to draw, and leave it a while to watch frost grow where it is thickest.',
+    how: [['Blow', 'fog the glass and scatter the snow'], ['Pinch', 'with no flake in reach, draw in the fog'], ['Palm', 'catch a few flakes'], ['Fist', 'sweep the drifts'], ['Space', 'hold for a silent breath']],
+    hint: 'blow to fog the glass and scatter the snow · pinch with no flake to draw in the fog · open palm catches · fist sweeps · space breathes · c clears · s saves · 1–4 change season',
+    load: 'frosting the glass…', ready: 'ready — breathe on the glass',
+    grade: 'saturate(0.62) brightness(1.06) contrast(0.98)', wash: 'rgba(150,200,240,0.16)', vig: '10,22,38', glow: '200,235,255', ember: ['215,242,255', '110,170,230'],
+    density: 1.6, size: 0.58, fall: 0.62, flutter: 0.55, pile: 2.2, wander: false, lands: true, fog: true, ground: true,
+    pick: () => Math.random() < 0.3 ? { spr: 5 + ((Math.random() * 2) | 0), kind: K_BIT, sz: 0.8 } : { spr: (Math.random() * 5) | 0, kind: K_BIT, sz: 1 }
+  }
+};
+const ORDER = ['spring', 'summer', 'autumn', 'winter'];
+for (const id of ORDER) SEASONS[id].id = id;
+
+function defaultSeason() {
+  const h = location.hash.slice(1);
+  if (SEASONS[h]) return h;
+  try { const s = localStorage.getItem('windfall-season'); if (SEASONS[s]) return s; } catch (e) { /* storage blocked */ }
+  const m = new Date().getMonth();
+  return m <= 1 || m === 11 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn';
+}
+let S = SEASONS[defaultSeason()], SPR = S.spr;
 
 // ---------------------------------------------------------------- state
-let dpr = 1, W = 0, H = 0;
+let dpr = 1, W = 0, H = 0, clock = 0, swapT = 0;
 let running = false, rafId = 0, frame = 0, lastT = 0, stream = null;
 let cv = { vw: 1280, vh: 720, s: 1, ox: 0, oy: 0 };
 
@@ -304,12 +534,15 @@ const head = { on: false, x: 0, y: 0, hw: 0 };
 let actx = null, analyser = null, abuf = null, hasMic = false;
 let floorLevel = null, lastKey = -1e9, spaceDown = false, breathNow = 0;
 
-const leaves = [], embers = [];
-let heights = new Float32Array(1), colW = 8, restCount = 0, airCount = 0, spawnAcc = 0, bornCounter = 0;
+const leaves = [], embers = [], blooms = [], frost = [];
+let heights = new Float32Array(1), colW = 8, restCount = 0, airCount = 0, spawnAcc = 0, bornCounter = 0, bloomAcc = 0;
 let palmCnt = 0, headCnt = 0;
 
+// the fogged glass: a coarse grid of how misted each patch is
+let fogCell = 18, fogCols = 1, fogRows = 1, fogD = new Float32Array(1), fogT = new Float32Array(1), fogImg = null, wipePrev = null;
+
 // hand-derived state
-let handW = 100, cs = { x: 0, y: 0 }, hv = { x: 0, y: 0 }, csInit = false;
+let handW = 100, cs = { x: 0, y: 0 }, hv = { x: 0, y: 0 }, csInit = false, still = 0;
 let pinchState = false, pinching = false, prCount = 0, prStart = 0;
 let pp = { x: 0, y: 0 }, pv = { x: 0, y: 0 }, ppInit = false;
 let held = null, sparkMode = false;
@@ -317,10 +550,20 @@ const palm = { on: false, x: 0, y: 0, r: 0 };
 const broom = { on: false, x: 0, y: 0, r: 0 };
 let saveReq = false;
 
-// gust (set once per frame, read per leaf)
+// gust (set once per frame, read per bit)
 let gOn = false, gx = 0, gy = 0, gR = 1, gR2 = 1, gAcc = 0, _ux = 0, _uy = 0;
 
 // ---------------------------------------------------------------- sizing
+function buildVig() {
+  if (!W) return;
+  vig.width = W; vig.height = H;
+  const g = vig.getContext('2d');
+  const r = Math.hypot(W, H) / 2;
+  const grad = g.createRadialGradient(W / 2, H / 2, r * 0.45, W / 2, H / 2, r);
+  grad.addColorStop(0, 'rgba(' + S.vig + ',0)');
+  grad.addColorStop(1, 'rgba(' + S.vig + ',0.55)');
+  g.fillStyle = grad; g.fillRect(0, 0, W, H);
+}
 function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 2);
   const nw = Math.max(1, Math.round(innerWidth * dpr)), nh = Math.max(1, Math.round(innerHeight * dpr));
@@ -329,18 +572,19 @@ function resize() {
   canvas.width = W; canvas.height = H;
   colW = 8 * dpr;
   heights = new Float32Array(Math.ceil(W / colW) + 3);
-  for (let i = leaves.length - 1; i >= 0; i--) {         // the floor moved: let resting leaves fall again
+  for (let i = leaves.length - 1; i >= 0; i--) {         // the floor moved: let resting bits fall again
     const l = leaves[i];
     if (l.st === REST) { l.st = FALL; l.hc = 0; l.vy = 0; }
   }
   restCount = 0;
-  vig.width = W; vig.height = H;
-  const g = vig.getContext('2d');
-  const r = Math.hypot(W, H) / 2;
-  const grad = g.createRadialGradient(W / 2, H / 2, r * 0.45, W / 2, H / 2, r);
-  grad.addColorStop(0, 'rgba(26,8,16,0)');
-  grad.addColorStop(1, 'rgba(26,8,16,0.55)');
-  g.fillStyle = grad; g.fillRect(0, 0, W, H);
+  fogCell = Math.round(18 * dpr);
+  fogCols = Math.ceil(W / fogCell); fogRows = Math.ceil(H / fogCell);
+  fogD = new Float32Array(fogCols * fogRows); fogT = new Float32Array(fogCols * fogRows);
+  fogS.width = fogCols; fogS.height = fogRows;
+  fogImg = fogCtx.createImageData(fogCols, fogRows);
+  for (let i = 0; i < fogD.length; i++) { fogImg.data[i * 4] = 228; fogImg.data[i * 4 + 1] = 240; fogImg.data[i * 4 + 2] = 252; }
+  frost.length = 0;
+  buildVig();
 }
 addEventListener('resize', resize);
 resize();
@@ -378,22 +622,32 @@ function addHeight(x, c) {
 function clearFloor() {
   for (let i = leaves.length - 1; i >= 0; i--) if (leaves[i].st === REST) leaves.splice(i, 1);
   heights.fill(0); restCount = 0;
+  blooms.length = 0; frost.length = 0; fogD.fill(0); fogT.fill(0);
 }
 
-// ---------------------------------------------------------------- leaves
+// ---------------------------------------------------------------- bits (leaves, petals, flakes, seeds, butterflies, fireflies)
 function newLeaf(y) {
   const z = Math.random();
   const short = Math.min(W, H);
-  return {
+  const p = S.pick();
+  const l = {
     x: rand(-0.05 * W, 1.05 * W), y,
-    vx: rand(-20, 20) * dpr, vy: rand(20, 60) * dpr, vt: (30 + 45 * z) * dpr * rand(0.8, 1.2),
-    rot: rand(0, TAU), vr: 0, ph: rand(0, TAU), fq: rand(0.8, 1.8), fa: rand(30, 60) * dpr,
+    vx: rand(-20, 20) * dpr, vy: rand(20, 60) * dpr, vt: (30 + 45 * z) * dpr * rand(0.8, 1.2) * S.fall,
+    rot: rand(0, TAU), vr: 0, ph: rand(0, TAU), fq: rand(0.8, 1.8), fa: rand(30, 60) * dpr * S.flutter,
     flip: rand(0, TAU), fs: rand(1.2, 3.2),
-    size: (short * 0.03 + z * short * 0.03) * rand(0.85, 1.15),
+    size: (short * 0.03 + z * short * 0.03) * rand(0.85, 1.15) * S.size * p.sz,
     z, b: z < 0.33 ? 0 : z < 0.66 ? 1 : 2,
-    spr: (Math.random() * SPR.length) | 0,
-    st: FALL, dx: 0, hc: 0, oy: 0, sq: 0.3, rest: 0, born: 0, cd: 0
+    spr: p.spr, kind: p.kind,
+    st: FALL, dx: 0, hc: 0, oy: 0, sq: 0.3, rest: 0, born: 0, cd: 0,
+    hy: rand(0.15, 0.85) * H                       // the height a wanderer likes to hover around
   };
+  if (S.wander) {
+    l.vy = rand(-20, 20) * dpr;
+    if (p.kind === K_BFLY) { l.fq = rand(0.9, 1.6); l.fa = rand(150, 240) * dpr; l.fs = rand(9, 13); }
+    else if (p.kind === K_FLY) { l.fq = rand(0.2, 0.45); l.fa = rand(25, 50) * dpr; l.fs = rand(1.1, 2.2); }
+    else { l.fq = rand(0.25, 0.6); l.fa = rand(25, 55) * dpr; }
+  }
+  return l;
 }
 function recycle(l) {
   const fresh = newLeaf(-60 * dpr);
@@ -404,7 +658,7 @@ function land(l) {
   l.oy = rand(-0.2, 0.2) * l.size; l.rot = rand(0, TAU); l.sq = rand(0.22, 0.36);
   l.born = ++bornCounter;
   const h = heightAt(l.x);
-  if (h < MAX_PILE * H) { l.hc = l.size * 0.07; addHeight(l.x, l.hc); } else l.hc = 0;
+  if (h < MAX_PILE * H) { l.hc = l.size * 0.07 * S.pile; addHeight(l.x, l.hc); } else l.hc = 0;
   l.y = H - h - l.size * 0.04 + l.oy;
   restCount++;
   if (restCount > MAX_REST) trimRest();
@@ -431,7 +685,7 @@ function gustAt(x, y) {
   _ux = dx / d; _uy = dy / d - 0.35;               // outward from the mouth, with a lift
   return gAcc * f * f;
 }
-function sweepAt(l, dt) {                            // a fist drags leaves along with the hand
+function sweepAt(l, dt) {                            // a fist drags bits along with the hand
   if (!broom.on) return false;
   const dx = l.x - broom.x, dy = l.y - broom.y, d2 = dx * dx + dy * dy;
   if (d2 >= broom.r * broom.r) return false;
@@ -441,7 +695,196 @@ function sweepAt(l, dt) {                            // a fist drags leaves alon
   return Math.hypot(hv.x, hv.y) > 150 * dpr;
 }
 
+// summer: nothing falls. each bit drifts toward a velocity that changes slowly, tethered to its own height
+function wander(l, dt) {
+  const k = Math.min(1, dt * 1.2);
+  let tx = Math.sin(l.ph) * l.fa;
+  let ty = Math.cos(l.ph * 0.73 + l.z * 7) * l.fa * 0.7 + (l.hy - l.y) * 0.5;
+  if (l.kind === K_BIT) { tx += BREEZE * dpr; ty -= 8 * dpr; }
+  if (l.kind === K_FLY && still > 0.02) {            // hold still and the fireflies come to circle your hand
+    const dx = cs.x - l.x, dy = cs.y - l.y, d = Math.hypot(dx, dy) || 1;
+    const orbit = handW * (0.9 + 0.9 * l.z);
+    const pull = clamp((d - orbit) * 1.2, -200 * dpr, 360 * dpr) * still, tang = 150 * dpr * still;
+    tx += dx / d * pull - dy / d * tang;
+    ty += dy / d * pull + dx / d * tang;
+  }
+  l.vx += (tx - l.vx) * k; l.vy += (ty - l.vy) * k;
+}
+
+// ---------------------------------------------------------------- spring: flowers that rise toward your hand
+function bloomTop(b) {
+  const grow = Math.min(1, b.t * 1.4), e = 1 - (1 - grow) * (1 - grow), hh = b.h * e;
+  return { x: b.x + b.bend + Math.sin(clock * 1.3 + b.ph) * 0.02 * hh, y: b.base - hh };
+}
+function spawnPetal(x, y, vx, vy, col) {
+  if (leaves.length >= MAX_LEAVES) return;
+  const l = newLeaf(y);
+  l.x = x; l.vx = vx + rand(-40, 40) * dpr; l.vy = vy - rand(0, 60) * dpr;
+  l.spr = 6 + col; l.kind = K_BIT; l.size = Math.min(W, H) * rand(0.026, 0.042); l.cd = 0.4;
+  leaves.push(l);
+}
+function shedBloom(b, top) {                         // the whole flower lets go at once
+  top = top || bloomTop(b);
+  for (let i = 0; i < b.n; i++) spawnPetal(top.x + rand(-1, 1) * b.sz * 0.4, top.y, rand(-90, 90) * dpr, rand(-120, -20) * dpr, b.col);
+  const i = blooms.indexOf(b);
+  if (i >= 0) blooms.splice(i, 1);
+}
+function growBloom() {
+  if (blooms.length >= MAX_BLOOMS) shedBloom(blooms[0]);
+  const x = clamp(palm.x + rand(-1.7, 1.7) * palm.r, 0.02 * W, 0.98 * W);
+  const base = H - heightAt(x);
+  const reach = Math.max(0.12 * H, base - palm.y);   // grow toward the hand
+  blooms.push({
+    x, base, h: Math.min(0.42 * H, reach * rand(0.45, 0.95)), t: 0, spd: rand(0.4, 0.7),
+    col: (Math.random() * BLOOM_COLS.length) | 0, n: 5 + ((Math.random() * 3) | 0), sz: Math.min(W, H) * rand(0.035, 0.06),
+    bend: 0, vb: 0, ph: rand(0, TAU), rot: rand(0, TAU), age: 0
+  });
+}
+function updateBlooms(dt) {
+  if (palm.on) { bloomAcc += dt; while (bloomAcc > 0.16) { bloomAcc -= 0.16; growBloom(); } } else bloomAcc = 0;
+  const sweeping = broom.on && Math.hypot(hv.x, hv.y) > 150 * dpr;
+  for (let i = blooms.length - 1; i >= 0; i--) {
+    const b = blooms[i];
+    b.age += dt; b.t = Math.min(1, b.t + dt * b.spd);
+    b.base += (H - heightAt(b.x) - b.base) * Math.min(1, dt * 6);
+    const top = bloomTop(b);
+    const g = gustAt(top.x, top.y);
+    if (g > 0) {
+      b.vb += _ux * g * dt * 1.4;
+      if (b.t > 0.7 && g > 110 * dpr && Math.random() < dt * g / (260 * dpr)) {   // blow on it: a petal at a time
+        spawnPetal(top.x, top.y, _ux * g * 0.3, _uy * g * 0.3, b.col);
+        if (--b.n <= 2) { shedBloom(b, top); continue; }
+      }
+    }
+    b.vb += (-b.bend * 16 - b.vb * 3.2) * dt;
+    b.bend = clamp(b.bend + b.vb * dt, -0.7 * b.h, 0.7 * b.h);
+    if (b.age > 50 || (sweeping && Math.hypot(top.x - broom.x, top.y - broom.y) < broom.r * 1.2)) shedBloom(b, top);
+  }
+}
+function drawBlooms() {
+  for (const b of blooms) {
+    const grow = Math.min(1, b.t * 1.4), e = 1 - (1 - grow) * (1 - grow), hh = b.h * e;
+    const open = clamp((b.t - 0.5) / 0.5, 0, 1), o = open * open * (3 - 2 * open);
+    const top = bloomTop(b);
+    const cx = b.x + (top.x - b.x) * 0.2, cy = b.base - hh * 0.55;
+    ctx.strokeStyle = '#4c8a3a'; ctx.lineWidth = Math.max(2, 3.2 * dpr); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(b.x, b.base); ctx.quadraticCurveTo(cx, cy, top.x, top.y); ctx.stroke();
+    // a pair of leaves a third of the way up
+    const u = 0.38, mx = (1 - u) * (1 - u) * b.x + 2 * u * (1 - u) * cx + u * u * top.x, my = (1 - u) * (1 - u) * b.base + 2 * u * (1 - u) * cy + u * u * top.y;
+    ctx.fillStyle = '#5da043';
+    const ll = Math.min(hh * 0.22, 0.05 * Math.min(W, H)) * e;
+    if (ll > 2) {
+      ctx.beginPath(); ctx.ellipse(mx - ll * 0.7, my - ll * 0.2, ll, ll * 0.36, -0.5, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mx + ll * 0.7, my - ll * 0.5, ll, ll * 0.36, 0.5, 0, TAU); ctx.fill();
+    }
+    const R = b.sz * (0.3 + 0.7 * o), col = BLOOM_COLS[b.col];
+    if (o < 0.04) {                                    // a closed bud
+      ctx.fillStyle = mixHex(col, '#7a2a50', 0.35);
+      ctx.beginPath(); ctx.ellipse(top.x, top.y - R * 0.3, R * 0.4, R * 0.62, 0, 0, TAU); ctx.fill();
+      continue;
+    }
+    ctx.lineWidth = 1.2 * dpr; ctx.strokeStyle = mixHex(col, '#6e1c44', 0.45);
+    for (let i = 0; i < b.n; i++) {
+      const a = b.rot + i * TAU / b.n;
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.ellipse(top.x + Math.cos(a) * R * 0.52, top.y + Math.sin(a) * R * 0.52, R * 0.52, R * 0.34, a, 0, TAU); ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = '#f4c542'; ctx.beginPath(); ctx.arc(top.x, top.y, R * 0.26, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#c4572d'; ctx.beginPath(); ctx.arc(top.x, top.y, R * 0.11, 0, TAU); ctx.fill();
+  }
+}
+
+// ---------------------------------------------------------------- winter: fog on the glass, and the frost that grows in it
+function fogAdd(x, y, r, amt) {
+  const c0 = Math.max(0, ((x - r) / fogCell) | 0), c1 = Math.min(fogCols - 1, ((x + r) / fogCell) | 0);
+  const r0 = Math.max(0, ((y - r) / fogCell) | 0), r1 = Math.min(fogRows - 1, ((y + r) / fogCell) | 0);
+  for (let j = r0; j <= r1; j++) for (let i = c0; i <= c1; i++) {
+    const d = Math.hypot((i + 0.5) * fogCell - x, (j + 0.5) * fogCell - y) / r;
+    if (d < 1) { const k = j * fogCols + i; fogD[k] = Math.min(1, fogD[k] + amt * Math.pow(1 - d, 1.5)); }
+  }
+}
+function fogWipe(x, y, r) {
+  const c0 = Math.max(0, ((x - r) / fogCell) | 0), c1 = Math.min(fogCols - 1, ((x + r) / fogCell) | 0);
+  const r0 = Math.max(0, ((y - r) / fogCell) | 0), r1 = Math.min(fogRows - 1, ((y + r) / fogCell) | 0);
+  for (let j = r0; j <= r1; j++) for (let i = c0; i <= c1; i++) {
+    const d = Math.hypot((i + 0.5) * fogCell - x, (j + 0.5) * fogCell - y) / r;
+    if (d < 1) { const k = j * fogCols + i; fogD[k] *= Math.max(0, 1 - (1 - d) * 2.2); fogT[k] = 0; }
+  }
+  for (let i = frost.length - 1; i >= 0; i--) if (Math.hypot(frost[i].x - x, frost[i].y - y) < r + frost[i].r * 0.5) frost.splice(i, 1);
+}
+function updateFog(dt) {
+  if (breathNow > 0) fogAdd(mouthE.x, mouthE.y, 0.2 * Math.min(W, H) * (0.6 + 0.6 * breathNow), breathNow * dt * 1.5);
+  if (pinching && sparkMode) {                       // a fingertip drawn through the fog
+    const r = Math.max(30 * dpr, 0.3 * handW);
+    const a = wipePrev || pp, steps = Math.max(1, Math.ceil(Math.hypot(pp.x - a.x, pp.y - a.y) / (r * 0.5)));
+    for (let s = 1; s <= steps; s++) fogWipe(a.x + (pp.x - a.x) * s / steps, a.y + (pp.y - a.y) * s / steps, r);
+    wipePrev = { x: pp.x, y: pp.y };
+  } else wipePrev = null;
+  let born = 0;
+  for (let k = 0; k < fogD.length; k++) {
+    if (fogD[k] <= 0) { fogT[k] = 0; continue; }
+    fogD[k] = Math.max(0, fogD[k] - dt * 0.04);
+    if (fogD[k] > 0.8) {
+      fogT[k] += dt;
+      if (fogT[k] > 2.2 && born < 1) {               // fog left thick for a while freezes, away from frost already there
+        fogT[k] = 1.2;
+        const x = ((k % fogCols) + 0.5) * fogCell + rand(-0.6, 0.6) * fogCell, y = (((k / fogCols) | 0) + 0.5) * fogCell + rand(-0.6, 0.6) * fogCell;
+        const r = Math.min(W, H) * rand(0.05, 0.1);
+        if (frost.some(f => Math.hypot(f.x - x, f.y - y) < (f.r + r) * 0.75)) continue;
+        born++; fogD[k] -= 0.35;
+        if (frost.length >= MAX_FROST) frost.shift();
+        frost.push({ x, y, r, rot: rand(0, TAU), spr: (Math.random() * FROST.length) | 0, age: 0, life: rand(24, 34) });
+      }
+    } else fogT[k] = 0;
+  }
+  for (let i = frost.length - 1; i >= 0; i--) { frost[i].age += dt; if (frost[i].age > frost[i].life) frost.splice(i, 1); }
+}
+function drawFog() {
+  const d = fogImg.data;
+  for (let k = 0; k < fogD.length; k++) d[k * 4 + 3] = Math.min(1, fogD[k]) * 205;
+  fogCtx.putImageData(fogImg, 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(fogS, 0, 0, fogCols * fogCell, fogRows * fogCell);
+  for (const f of frost) {
+    const g = Math.min(1, f.age / 1.6), e = 1 - Math.pow(1 - g, 3), fade = Math.min(1, (f.life - f.age) / 5);
+    const sc = f.r * (0.3 + 0.7 * e) / 64;
+    const cr = Math.cos(f.rot), sr = Math.sin(f.rot);
+    ctx.globalAlpha = 0.9 * fade;
+    ctx.setTransform(cr * sc, sr * sc, -sr * sc, cr * sc, f.x, f.y);
+    ctx.drawImage(FROST[f.spr], -64, -64);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+}
+function drawSnowGround() {
+  let mx = 0;
+  for (let i = 0; i < heights.length; i++) if (heights[i] > mx) mx = heights[i];
+  if (mx < 1.5 * dpr) return;
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let i = 0; i < heights.length; i++) ctx.lineTo(i * colW, H - heights[i] * 1.1);
+  ctx.lineTo(heights.length * colW, H); ctx.closePath();
+  const g = ctx.createLinearGradient(0, H - mx * 1.1, 0, H);
+  g.addColorStop(0, 'rgba(246,251,255,0.95)'); g.addColorStop(1, 'rgba(206,225,243,0.97)');
+  ctx.fillStyle = g; ctx.fill();
+}
+
+// ---------------------------------------------------------------- summer: light through the trees
+function drawRays() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) {
+    const x = (0.12 + i * 0.22 + 0.04 * Math.sin(clock * 0.15 + i * 2)) * W, w = (0.05 + 0.03 * ((i * 7) % 3)) * W;
+    const g = ctx.createLinearGradient(x, 0, x - 0.35 * H, H);
+    const a = 0.05 + 0.03 * Math.sin(clock * 0.4 + i * 1.7);
+    g.addColorStop(0, 'rgba(255,214,120,' + a + ')'); g.addColorStop(1, 'rgba(255,214,120,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(x - w, 0); ctx.lineTo(x + w, 0); ctx.lineTo(x + w - 0.35 * H, H); ctx.lineTo(x - w - 0.35 * H, H); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------- the world
 function updateWorld(dt) {
+  clock += dt;
   const short = Math.min(W, H);
   gOn = breathNow > 0;
   gx = mouthE.x; gy = mouthE.y;
@@ -458,15 +901,19 @@ function updateWorld(dt) {
       case FALL: {
         air++;
         l.ph += dt * l.fq * 3; l.flip += dt * l.fs;
-        const flat = 0.6 + 0.4 * Math.abs(Math.sin(l.flip));
-        l.vy += (l.vt * flat - l.vy) * Math.min(1, dt * 1.5);
-        l.vx += Math.sin(l.ph) * l.fa * dt;
-        l.vx -= l.vx * Math.min(1, dt * 0.8);
+        if (S.wander) wander(l, dt);
+        else {
+          const flat = 0.6 + 0.4 * Math.abs(Math.sin(l.flip));
+          l.vy += (l.vt * flat - l.vy) * Math.min(1, dt * 1.5);
+          l.vx += Math.sin(l.ph) * l.fa * dt;
+          l.vx -= l.vx * Math.min(1, dt * 0.8);
+        }
         const g = gustAt(l.x, l.y);
         if (g > 0) { l.vx += _ux * g * dt; l.vy += _uy * g * dt; l.flip += dt * g * 0.004; affected++; ax += l.x; }
         if (sweepAt(l, dt)) { affected++; ax += l.x; }
         if (l.cd > 0) l.cd -= dt;
-        if (palm.on && palmCnt < MAX_PALM && l.cd <= 0) { // an open hand draws nearby leaves in
+        const catchable = l.kind !== K_FLY;               // fireflies are never caught, only circled
+        if (palm.on && catchable && palmCnt < MAX_PALM && l.cd <= 0) { // an open hand draws nearby bits in
           const mx = palm.x - l.x, my = palm.y - l.y, md = Math.hypot(mx, my), mr = palm.r * 3.2;
           if (md < mr && md > 1) {
             const f = 1 - md / mr, k = f * f * 1400 * dpr;
@@ -474,19 +921,25 @@ function updateWorld(dt) {
             l.vx -= l.vx * Math.min(1, dt * 2.2 * f); l.vy -= (l.vy - l.vt) * Math.min(1, dt * 2.2 * f);   // settle instead of overshooting
           }
         }
-        l.vr +=((Math.sin(l.ph) * 1.1 + l.vx * 0.012 / dpr) - l.vr) * Math.min(1, dt * 2.5);
-        l.rot += l.vr * dt;
+        if (l.kind === K_BFLY) {                          // butterflies face where they are going
+          const sp = Math.hypot(l.vx, l.vy);
+          const tr = sp > 25 * dpr ? Math.atan2(l.vy, l.vx) + Math.PI / 2 : 0;
+          l.rot += angDiff(tr, l.rot) * Math.min(1, dt * 4);
+        } else {
+          l.vr += ((Math.sin(l.ph) * 1.1 + l.vx * 0.012 / dpr) - l.vr) * Math.min(1, dt * 2.5);
+          l.rot += l.vr * dt;
+        }
         l.x += l.vx * dt; l.y += l.vy * dt;
 
-        if (palm.on && palmCnt < MAX_PALM && l.cd <= 0) { // anything touching the palm is caught
+        if (palm.on && catchable && palmCnt < MAX_PALM && l.cd <= 0) { // anything touching the palm is caught
           const dxp = l.x - palm.x, dyp = l.y - palm.y;
           if (dxp * dxp + dyp * dyp < palm.r * palm.r * 1.3) {
             l.st = PALM; l.dx = clamp(dxp, -palm.r * 0.9, palm.r * 0.9); l.vx = l.vy = 0; palmCnt++;
             break;
           }
         }
-        if (l.vy > 0) {
-          if (head.on && headCnt < MAX_HEAD) {
+        if (l.vy > 0 || S.wander) {
+          if (catchable && head.on && headCnt < MAX_HEAD && l.vy > 0) {
             const dxh = l.x - head.x;
             if (Math.abs(dxh) < head.hw) {
               const sy = head.y + (dxh / head.hw) * (dxh / head.hw) * head.hw * 0.35;
@@ -495,7 +948,7 @@ function updateWorld(dt) {
               }
             }
           }
-          if (l.y + l.size * 0.15 >= H - heightAt(l.x)) { land(l); break; }
+          if (S.lands && l.vy > 0 && l.y + l.size * 0.15 >= H - heightAt(l.x)) { land(l); break; }
         }
         if (l.y > H + 200 * dpr || l.x < -0.3 * W || l.x > 1.3 * W || l.y < -1.2 * H) recycle(l);
         break;
@@ -517,18 +970,21 @@ function updateWorld(dt) {
       case HELD: {
         const k = Math.min(1, dt * 18);
         l.x += (pp.x - l.x) * k; l.y += (pp.y - l.y) * k;
-        l.rot += dt * 0.8;
+        if (l.kind === K_BFLY) l.flip += dt * 12; else l.rot += dt * 0.8;
         break;
       }
       case PALM: {
         if (!palm.on) { release(l, hv.x * 0.5, 0); break; }
         if (tossing) { release(l, hv.x * 1.0 + rand(-60, 60) * dpr, hv.y * 1.0 - 150 * dpr); break; }
+        const gp = gustAt(l.x, l.y);                      // blow it off your hand
+        if (gp > 300 * dpr) { release(l, _ux * gp * 0.3, _uy * gp * 0.3); break; }
         l.dx += rand(-8, 8) * dpr * dt;
         if (Math.abs(l.dx) >= palm.r) { release(l, Math.sign(l.dx) * 50 * dpr, 20 * dpr); break; }
         const k = Math.min(1, dt * 16);                  // glide onto the palm rather than teleport
         l.x += (palm.x + l.dx - l.x) * k;
         l.y += (palm.y - 0.5 * Math.sqrt(palm.r * palm.r - l.dx * l.dx) - l.size * 0.12 - l.y) * k;
         l.rot += (0 - Math.sin(l.rot)) * dt * 2;
+        if (l.kind === K_BFLY) l.flip += dt * 3.2;      // a slow wingbeat while it rests
         pc++;
         break;
       }
@@ -538,6 +994,7 @@ function updateWorld(dt) {
         if (Math.abs(l.dx) > head.hw) l.dx = Math.sign(l.dx) * head.hw;
         l.x = head.x + l.dx;
         l.y = head.y + (l.dx / head.hw) * (l.dx / head.hw) * head.hw * 0.35 - l.size * 0.1;
+        if (l.kind === K_BFLY) l.flip += dt * 3.2;
         hc++;
         break;
       }
@@ -545,15 +1002,18 @@ function updateWorld(dt) {
   }
   palmCnt = pc; headCnt = hc; airCount = air;
 
-  // keep roughly the chosen number of leaves aloft
-  const target = +sizeEl.value * PER_STEP;
+  // keep roughly the chosen number aloft
+  const target = +sizeEl.value * PER_STEP * S.density;
   const need = target - air;
   if (need > 0 && leaves.length < MAX_LEAVES) {
     spawnAcc += dt * (3 + need * 0.12);
     while (spawnAcc >= 1) { spawnAcc--; leaves.push(newLeaf(-60 * dpr)); }
   }
 
-  // embers from a pinch that found no leaf
+  if (S.blooms) updateBlooms(dt);
+  if (S.fog) updateFog(dt);
+
+  // sparks from a pinch that found nothing
   if (pinching && sparkMode) {
     const sp = Math.hypot(pv.x, pv.y);
     if (sp > 60 * dpr) {
@@ -639,7 +1099,7 @@ function updateHand(now, dt) {
   if (!pinchState && extended >= 3) palmSeen = now;
   palm.on = !pinchState && now - palmSeen < 200;     // 200ms grace so one bad frame doesn't drop the palm
   if (palm.on) { palm.x = cs.x; palm.y = cs.y; palm.r = 1.0 * handW; }
-  setGesture(pinchState ? (held ? 'pinch · holding a leaf' : 'pinch') : palm.on ? 'open palm · catching' : 'hand seen — open it flat to catch');
+  setGesture(pinchState ? (held ? 'pinch · holding something' : S.fog ? 'pinch · drawing' : 'pinch') : palm.on ? 'open palm · catching' : 'hand seen — open it flat to catch');
 
   // the index must be extended as the pinch starts, never mid-pinch
   if (pinchState && (pinching || !c[0])) {
@@ -682,7 +1142,13 @@ function readBreath(now) {
 // ---------------------------------------------------------------- render
 function drawLeaf(l) {
   let sx = l.size / 64, sy, a = 1;
-  if (l.st === FALL) { const cf = Math.abs(Math.cos(l.flip)); sy = sx * (0.18 + 0.82 * cf); a = 0.78 + 0.22 * cf; }
+  if (l.kind === K_BFLY) {
+    const flap = l.st === FALL || l.st === HELD ? 0.2 + 0.8 * Math.abs(Math.cos(l.flip)) : 0.45 + 0.55 * Math.abs(Math.cos(l.flip));
+    sy = sx; sx *= flap;
+  } else if (S.wander) {                              // a seed keeps its shape
+    sy = sx;
+    if (l.st === HELD) { sx *= 1.15; sy = sx; }
+  } else if (l.st === FALL) { const cf = Math.abs(Math.cos(l.flip)); sy = sx * (0.18 + 0.82 * cf); a = 0.78 + 0.22 * cf; }
   else if (l.st === HELD) { sx *= 1.15; sy = sx; }
   else if (l.st === REST) sy = sx * l.sq;
   else sy = sx * 0.45;
@@ -695,18 +1161,32 @@ function drawLeaves() {
   for (let pass = 0; pass < 4; pass++) {
     for (let i = 0; i < leaves.length; i++) {
       const l = leaves[i];
+      if (l.kind === K_FLY) continue;
       const p = (l.st === FALL || l.st === REST) ? l.b : 3;
       if (p !== pass) continue;
-      if (l.st === HELD) {                             // a warm glow marks the leaf in your fingers
+      if (l.st === HELD) {                             // a warm glow marks what is in your fingers
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
         const g = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.size * 1.5);
-        g.addColorStop(0, 'rgba(255,190,90,0.38)'); g.addColorStop(1, 'rgba(255,190,90,0)');
+        g.addColorStop(0, 'rgba(' + S.glow + ',0.38)'); g.addColorStop(1, 'rgba(' + S.glow + ',0)');
         ctx.fillStyle = g; ctx.fillRect(l.x - l.size * 1.5, l.y - l.size * 1.5, l.size * 3, l.size * 3);
         ctx.globalCompositeOperation = 'source-over';
       }
       drawLeaf(l);
     }
+  }
+  if (S.wander) {                                      // fireflies glow, brightest when they have found a still hand
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < leaves.length; i++) {
+      const l = leaves[i];
+      if (l.kind !== K_FLY) continue;
+      const pulse = 0.5 + 0.5 * Math.sin(l.flip);
+      const sc = l.size * 2.6 / 64 * (1 + 0.35 * still);
+      ctx.globalAlpha = clamp((0.2 + 0.8 * pulse * pulse) * (0.7 + 0.5 * still), 0, 1);
+      ctx.setTransform(sc, 0, 0, sc, l.x, l.y);
+      ctx.drawImage(SPR[l.spr], -64, -64);
+    }
+    ctx.globalCompositeOperation = 'source-over';
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
@@ -717,18 +1197,18 @@ function drawEmbers() {
   for (const e of embers) {
     const k = 1 - e.life / e.max, r = e.sz * (1 + 2 * k);
     const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r * 2.4);
-    g.addColorStop(0, 'rgba(255,196,110,' + (0.9 * k) + ')');
-    g.addColorStop(1, 'rgba(228,87,46,0)');
+    g.addColorStop(0, 'rgba(' + S.ember[0] + ',' + (0.9 * k) + ')');
+    g.addColorStop(1, 'rgba(' + S.ember[1] + ',0)');
     ctx.fillStyle = g;
     ctx.fillRect(e.x - r * 2.4, e.y - r * 2.4, r * 4.8, r * 4.8);
   }
   ctx.globalCompositeOperation = 'source-over';
 }
-function drawPalm() {                                // a faint warm pool under an open hand: it is being seen
+function drawPalm() {                                // a faint pool of light under an open hand: it is being seen
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const g = ctx.createRadialGradient(palm.x, palm.y, 0, palm.x, palm.y, palm.r * 1.3);
-  g.addColorStop(0, 'rgba(255,190,90,0.22)'); g.addColorStop(1, 'rgba(255,190,90,0)');
+  g.addColorStop(0, 'rgba(' + S.glow + ',0.22)'); g.addColorStop(1, 'rgba(' + S.glow + ',0)');
   ctx.fillStyle = g; ctx.fillRect(palm.x - palm.r * 1.3, palm.y - palm.r * 1.3, palm.r * 2.6, palm.r * 2.6);
   ctx.restore();
   ctx.strokeStyle = 'rgba(255,236,205,0.28)'; ctx.lineWidth = 1.5 * dpr;
@@ -742,7 +1222,7 @@ function drawRing() {
 function savePNG() {
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
-  a.download = 'windfall-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
+  a.download = 'windfall-' + S.id + '-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
   document.body.appendChild(a); a.click(); a.remove();
   flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
 }
@@ -779,6 +1259,10 @@ function loop(now) {
 
   updateHand(now, dt);
 
+  // how long the hand has been quiet (summer's fireflies come to a hand that holds still)
+  const calm = handLM && !broom.on && Math.hypot(hv.x, hv.y) < 0.8 * handW ? 1 : 0;
+  still += (calm - still) * Math.min(1, dt * (calm > still ? 0.8 : 3));
+
   breathNow = spaceDown ? 1 : readBreath(now);
   dotEl.style.opacity = breathNow > 0 ? 0.95 : 0.2;
 
@@ -786,14 +1270,23 @@ function loop(now) {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalCompositeOperation = 'source-over';
-  if (HAS_FILTER) ctx.filter = GRADE;
+  if (HAS_FILTER) ctx.filter = S.grade;
   drawCam(ctx);
   ctx.filter = 'none';
-  ctx.fillStyle = WASH; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = S.wash; ctx.fillRect(0, 0, W, H);
   ctx.drawImage(vig, 0, 0);
+  if (S.rays) drawRays();
+  if (S.ground) drawSnowGround();
+  if (S.fog) drawFog();
+  if (S.blooms) drawBlooms();
   if (palm.on) drawPalm();
   drawLeaves();
   drawEmbers();
+  if (swapT > 0) {                                     // fade in from the new season's dark
+    swapT -= dt;
+    ctx.fillStyle = 'rgba(' + S.vig + ',' + clamp(swapT / 0.6, 0, 1) + ')';
+    ctx.fillRect(0, 0, W, H);
+  }
   if (saveReq) { saveReq = false; savePNG(); }
   if (broom.on) drawRing();
 }
@@ -805,7 +1298,7 @@ function makeModels() {
   hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.5 });
   hands.onResults(r => {
     handLM = (r.multiHandLandmarks && r.multiHandLandmarks[0]) || null;
-    if (!handsReady) { handsReady = true; setStatus(hasMic ? 'ready — blow on the leaves' : 'no microphone — hold space for a gust'); }
+    if (!handsReady) { handsReady = true; setStatus(readyText()); }
   });
   face = new FaceDetection({ locateFile: f => FACE_BASE + f });
   face.setOptions({ model: 'short', minDetectionConfidence: 0.5 });
@@ -822,6 +1315,69 @@ function makeModels() {
   });
 }
 function setStatus(t) { statusEl.textContent = t; }
+function readyText() { return hasMic ? S.ready : 'no microphone — hold space for a gust'; }
+
+// ---------------------------------------------------------------- seasons
+function buildDrift() {                               // the bits drifting behind the start screen
+  const box = $('drift');
+  box.textContent = '';
+  box.classList.toggle('up', !!S.wander);
+  for (let i = 0; i < 18; i++) {
+    const img = new Image();
+    const idx = S.wander ? (Math.random() < 0.55 ? (Math.random() * 3) | 0 : 3 + ((Math.random() * 4) | 0)) : (Math.random() * SPR.length) | 0;
+    img.src = SPR[idx].toDataURL();
+    const sz = rand(26, 74);
+    img.width = img.height = sz;
+    img.style.left = rand(-4, 100) + 'vw';
+    img.style.setProperty('--sx', rand(-18, 18) + 'vw');
+    img.style.setProperty('--dur', rand(16, 30) + 's');
+    img.style.setProperty('--delay', (-rand(0, 28)) + 's');
+    img.alt = '';
+    box.appendChild(img);
+  }
+}
+function buildSeasonButtons() {
+  for (const host of [pickEl, seasonsEl]) {
+    host.textContent = '';
+    ORDER.forEach((id, n) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.season = id;
+      b.title = SEASONS[id].name + ' (' + (n + 1) + ')';
+      const dot = document.createElement('i'); dot.style.setProperty('--sw', SEASONS[id].sw);
+      const label = document.createElement('span'); label.textContent = SEASONS[id].name;
+      b.append(dot, label);
+      b.addEventListener('click', () => setSeason(id));
+      host.appendChild(b);
+    });
+  }
+}
+function resetWorld() {
+  held = null; pinchState = pinching = sparkMode = false; palm.on = broom.on = false; csInit = ppInit = false; still = 0; wipePrev = null;
+  leaves.length = 0; embers.length = 0; blooms.length = 0; frost.length = 0;
+  heights.fill(0); restCount = 0; fogD.fill(0); fogT.fill(0);
+  const target = Math.round(+sizeEl.value * PER_STEP * S.density);
+  for (let i = 0; i < target * 0.6; i++) leaves.push(newLeaf(rand(-0.1, 1) * H));   // already mid-flight when you arrive
+}
+function setSeason(id, first) {
+  if (!SEASONS[id] || (!first && SEASONS[id] === S)) return;
+  S = SEASONS[id]; SPR = S.spr;
+  document.documentElement.dataset.season = id;
+  $('kicker').textContent = S.kicker;
+  $('lede').textContent = S.lede;
+  const how = $('how'); how.textContent = '';
+  for (const [k, v] of S.how) {
+    const li = document.createElement('li'), b = document.createElement('b'), sp = document.createElement('span');
+    b.textContent = k; sp.textContent = v; li.append(b, sp); how.appendChild(li);
+  }
+  hintEl.textContent = S.hint;
+  hintEl.style.animation = 'none'; void hintEl.offsetWidth; hintEl.style.animation = '';
+  slabel.textContent = S.word; sizeEl.setAttribute('aria-label', S.word + ' density');
+  for (const btn of document.querySelectorAll('[data-season]')) btn.setAttribute('aria-checked', String(btn.dataset.season === id));
+  buildVig(); buildDrift();
+  try { localStorage.setItem('windfall-season', id); } catch (e) { /* storage blocked */ }
+  if (running) { resetWorld(); swapT = 0.6; setStatus(handsReady ? readyText() : S.load); }
+  else setStatus(S.load);
+}
 
 // ---------------------------------------------------------------- start / stop
 function showError(msg) { errEl.textContent = msg; errEl.hidden = false; goBtn.disabled = false; }
@@ -878,13 +1434,10 @@ async function begin() {
   floorLevel = null;
   mouthT = null; faceBox = null; handLM = null; head.on = false;
   mouthE = { x: W / 2, y: H * 0.55 };
-  held = null; pinchState = pinching = sparkMode = false; palm.on = broom.on = false; csInit = ppInit = false;
-  leaves.length = 0; embers.length = 0; heights.fill(0); restCount = 0;
-  const target = +sizeEl.value * PER_STEP;
-  for (let i = 0; i < target * 0.6; i++) leaves.push(newLeaf(rand(-0.1, 1) * H));   // already mid-fall when you arrive
-  setStatus(handsReady ? (hasMic ? 'ready — blow on the leaves' : 'no microphone — hold space for a gust') : 'loading the hand model…');
+  resetWorld();
+  setStatus(handsReady ? readyText() : 'loading the hand model…');
 
-  startEl.hidden = true; hud.hidden = false; leavesEl.hidden = false; shutter.hidden = false;
+  startEl.hidden = true; hud.hidden = false; leavesEl.hidden = false; shutter.hidden = false; seasonsEl.hidden = false;
   goBtn.disabled = false;
   running = true; frame = 0; lastT = performance.now();
   rafId = requestAnimationFrame(loop);
@@ -897,7 +1450,7 @@ function stop() {
   if (actx) actx.close();
   actx = analyser = null; hasMic = false; spaceDown = false;
   held = null; pinching = false;
-  hud.hidden = leavesEl.hidden = shutter.hidden = 
+  hud.hidden = leavesEl.hidden = shutter.hidden = seasonsEl.hidden = true;
   startEl.hidden = false;
 }
 
@@ -906,6 +1459,9 @@ goBtn.addEventListener('click', begin);
 shutter.addEventListener('click', () => { saveReq = true; });
 addEventListener('keydown', e => {
   lastKey = performance.now();
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = /^Digit([1-4])$/.exec(e.code);
+  if (n) { setSeason(ORDER[n[1] - 1]); return; }
   if (!running) return;
   if (e.code === 'Space') { e.preventDefault(); spaceDown = true; }
   else if (e.code === 'KeyC') clearFloor();
@@ -916,6 +1472,9 @@ addEventListener('keyup', e => {
   if (e.code === 'Space') { if (running) e.preventDefault(); spaceDown = false; }
 });
 addEventListener('blur', () => { spaceDown = false; });
+
+buildSeasonButtons();
+setSeason(S.id, true);
 </script>
 </body>
 </html>
