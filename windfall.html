@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Windfall</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3c6 5 10 10 8 16-1 4-5 7-8 10-3-3-7-6-8-10-2-6 2-11 8-16z' fill='%23e4572e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1017;
+    --ink-2: #2a1620;
+    --paper: #f4e7d0;
+    --ochre: #dc9b2c;
+    --rust: #b7471f;
+    --accent: #e4572e;
+    --dust: #c9b49a;
+    --glass: rgba(255,244,225,.14);
+    --glass-line: rgba(255,240,215,.40);
+    --display: "Young Serif", "Iowan Old Style", Georgia, serif;
+    --body: "Hanken Grotesk", "Avenir Next", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; background: var(--ink); color: var(--paper); font-family: var(--body); overflow: hidden; }
+
+  #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; background: var(--ink); }
+  #cam { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+  /* ---------- start screen ---------- */
+  #start {
+    position: fixed; inset: 0; z-index: 10; overflow: auto;
+    display: grid; align-content: center;
+    padding: clamp(24px, 6vw, 88px);
+    background:
+      radial-gradient(55vmax 40vmax at 85% 6%, rgba(220,155,44,.22), transparent 62%),
+      radial-gradient(60vmax 45vmax at 6% 100%, rgba(183,71,31,.20), transparent 60%),
+      linear-gradient(170deg, var(--ink-2), var(--ink));
+  }
+  #start::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .45; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .9  0 0 0 0 .8  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  #drift { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  #drift img {
+    position: absolute; top: 0; opacity: .9; will-change: transform;
+    animation: drift var(--dur) linear var(--delay) infinite backwards;
+  }
+  @keyframes drift {
+    0%   { transform: translate3d(0, -20vh, 0) rotate(0deg); }
+    25%  { transform: translate3d(var(--sx), 22vh, 0) rotate(110deg); }
+    50%  { transform: translate3d(calc(var(--sx) * -.7), 52vh, 0) rotate(230deg); }
+    75%  { transform: translate3d(calc(var(--sx) * .8), 82vh, 0) rotate(330deg); }
+    100% { transform: translate3d(calc(var(--sx) * -.3), 118vh, 0) rotate(450deg); }
+  }
+
+  .start-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(24px, 5vw, 80px); align-items: end; max-width: 1180px; }
+  .kicker { font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ochre); margin: 0 0 1.1rem; }
+  h1 {
+    margin: 0; font-family: var(--display); font-weight: 400;
+    font-size: clamp(3.4rem, 8.6vw, 8.4rem); line-height: .86; letter-spacing: -.035em;
+    color: var(--paper); position: relative; width: fit-content;
+  }
+  h1 .fall { color: var(--accent); }
+  h1 svg { position: absolute; left: 0; bottom: -.12em; width: 100%; height: .2em; overflow: visible; }
+  h1 path { fill: none; stroke: var(--ochre); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 800; stroke-dashoffset: 800; animation: draw 1.8s .6s cubic-bezier(.6,.1,.2,1) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .right { padding-bottom: .5rem; }
+  .right p.lede { margin: 0 0 1.3rem; line-height: 1.55; color: #e6d6bd; max-width: 38ch; font-size: 1.05rem; }
+  .how { list-style: none; counter-reset: s; padding: 0; margin: 0 0 2rem; border-top: 1px solid rgba(244,231,208,.2); }
+  .how li { counter-increment: s; display: grid; grid-template-columns: 1.6rem 5.4rem 1fr; padding: .6rem 0; border-bottom: 1px solid rgba(244,231,208,.2); font-size: .94rem; }
+  .how li::before { content: counter(s, decimal-leading-zero); color: var(--ochre); font-size: .72rem; padding-top: .18rem; }
+  .how b { font-weight: 600; }
+  .how span { color: #cdbb9f; }
+  #go {
+    font: 600 1rem var(--body); cursor: pointer;
+    background: var(--accent); color: #1a0d08; border: 0; border-radius: 2px;
+    padding: 1rem 1.6rem; display: inline-flex; gap: .8rem; align-items: center;
+    transition: transform .18s ease, background .18s ease;
+  }
+  #go:hover { background: #f06b40; transform: translateX(3px); }
+  #go:focus-visible, #shutter:focus-visible, #leaves input:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+  #go:disabled { opacity: .6; cursor: progress; transform: none; }
+  .privacy { margin: 1.3rem 0 0; font-size: .86rem; color: var(--dust); max-width: 44ch; line-height: 1.5; }
+  .privacy::before { content: ""; display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; background: var(--ochre); margin-right: .6rem; }
+  #err { margin: 1.1rem 0 0; padding: .8rem 1rem; border-left: 3px solid var(--accent); background: rgba(228,87,46,.14); color: var(--paper); font-size: .92rem; line-height: 1.45; max-width: 48ch; }
+
+  .rise { opacity: 0; transform: translateY(14px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+  .rise.d1 { animation-delay: .1s; } .rise.d2 { animation-delay: .35s; } .rise.d3 { animation-delay: .55s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  @media (max-width: 760px) {
+    .start-grid { grid-template-columns: 1fr; align-items: start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise { animation: none; opacity: 1; transform: none; }
+    h1 path { animation: none; stroke-dashoffset: 0; }
+    #drift { display: none; }
+  }
+
+  /* ---------- live UI ---------- */
+  #hud { position: fixed; left: 20px; top: 18px; z-index: 5; font-size: .8rem; line-height: 1.5; color: rgba(255,244,225,.92); text-shadow: 0 1px 8px rgba(0,0,0,.5); pointer-events: none; max-width: min(460px, 72vw); }
+  #hud .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; background: var(--ochre); opacity: .2; transition: opacity .12s; }
+  #hint { opacity: .88; animation: fade 1s 14s forwards; margin-top: 2px; }
+  @keyframes fade { to { opacity: 0; } }
+
+  .glass { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 6px 24px rgba(0,0,0,.2); }
+  #leaves { position: fixed; left: 20px; bottom: 20px; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 16px; border-radius: 999px; color: #fff; font-size: .85rem; }
+  #leaves input { width: 130px; accent-color: #fff; margin: 0; }
+  .round { position: fixed; bottom: 20px; z-index: 5; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; color: #fff; cursor: pointer; padding: 0; transition: transform .15s; }
+  .round:hover { transform: scale(1.06); }
+  .round:active { transform: scale(.94); }
+  #shutter { right: 20px; }
+  #flash { position: fixed; inset: 0; background: #fff4de; z-index: 6; pointer-events: none; opacity: 0; }
+  #flash.on { animation: flash .35s ease-out; }
+  @keyframes flash { 0% { opacity: .7; } 100% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<video id="cam" playsinline muted></video>
+
+<div id="hud" hidden>
+  <div><span class="dot" id="dot"></span><span id="status">waking the orchard…</span></div>
+  <div id="hint">blow to send a gust · open palm catches · pinch a leaf to lift it · fist sweeps · space gusts · c clears the floor · s saves</div>
+</div>
+<label id="leaves" class="glass" hidden><span>leaves</span><input id="size" type="range" min="7" max="38" step="1" value="15" aria-label="leaf density"></label>
+<button id="shutter" class="round glass" type="button" aria-label="Save a photo" hidden>
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9.5"/>
+    <path d="M12 2.5 15.6 9M21 8.2 14.2 9.6M21.2 15.5 15 12.3M12 21.5 8.4 15M3 15.8 9.8 14.4M2.8 8.5 9 11.7"/>
+  </svg>
+</button>
+<div id="flash"></div>
+
+<section id="start">
+  <div id="drift" aria-hidden="true"></div>
+  <div class="start-grid">
+    <div>
+      <p class="kicker rise d1">a small autumn for your webcam</p>
+      <h1 class="rise">Wind<span class="fall">fall</span>
+        <svg viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 20 C 60 4, 110 4, 150 16 S 215 28, 250 16 S 300 2, 330 12 C 350 19, 340 26, 326 20 S 340 6, 396 10"/></svg>
+      </h1>
+    </div>
+    <div class="right">
+      <p class="lede rise d2">Leaves fall through your camera and you're standing in them. Blow and they scatter. Hold out a hand and they land. Pick one up, throw it, or sweep the floor.</p>
+      <ul class="how rise d2">
+        <li><b>Blow</b><span>a gust leaves your mouth and scatters them</span></li>
+        <li><b>Palm</b><span>hold a hand open to catch a few, flick to toss</span></li>
+        <li><b>Pinch</b><span>lift one leaf, carry it, let it go</span></li>
+        <li><b>Fist</b><span>sweep the floor and the piles go flying</span></li>
+        <li><b>Space</b><span>hold for a silent gust</span></li>
+      </ul>
+      <div class="rise d3">
+        <button id="go" type="button">Step outside <span aria-hidden="true">→</span></button>
+        <p class="privacy">Everything runs in this browser tab. No frames, audio or data ever leave your machine, and nothing is uploaded or recorded. Needs camera and microphone.</p>
+        <div id="err" role="alert" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/face_detection.js" crossorigin="anonymous"></script>
+<script>
+'use strict';
+
+// ---------------------------------------------------------------- constants
+const GRADE = 'sepia(0.32) saturate(1.18) contrast(1.05) brightness(0.96)';
+const WASH = 'rgba(255,168,64,0.10)';
+const PINCH_DOWN = 0.22, PINCH_UP = 0.38;
+const EASE_FACE = 0.4;
+const PER_STEP = 12;                 // slider value * this = leaves aloft
+const MAX_LEAVES = 900, MAX_REST = 480, MAX_PILE = 0.16;
+const GUST_ACC = 1100;               // px/s^2 at full breath, right at the mouth
+const TOSS = 2.4;                    // palm speed (hand-widths per second) that flings its leaves
+const MAX_PALM = 18, MAX_HEAD = 7;
+const HANDS_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/';
+const FACE_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/';
+const TAU = Math.PI * 2;
+const FALL = 0, REST = 1, HELD = 2, PALM = 3, HEAD = 4;
+
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+// ---------------------------------------------------------------- elements
+const $ = id => document.getElementById(id);
+const canvas = $('scene'), ctx = canvas.getContext('2d');
+const cam = $('cam'), startEl = $('start'), goBtn = $('go'), errEl = $('err');
+const hud = $('hud'), statusEl = $('status'), dotEl = $('dot');
+const leavesEl = $('leaves'), sizeEl = $('size'), shutter = $('shutter'), flash = $('flash');
+const vig = document.createElement('canvas');
+const HAS_FILTER = 'filter' in ctx;
+
+// ---------------------------------------------------------------- leaf sprites
+const PALETTE = ['#c2411d', '#e0a030', '#d4741a', '#9e2b25', '#b3a032', '#7a3b2e'];
+const SHAPES = ['maple', 'oak', 'ginkgo', 'birch'];
+const SPR = [];
+
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mixHex(a, b, t) {
+  const A = hexToRgb(a), B = hexToRgb(b);
+  return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')';
+}
+// unit-space outlines (roughly -1..1), stem pointing down
+function outline(shape) {
+  const pts = [], veins = [];
+  let stem = [0, 0.55, 0, 0.95];
+  const N = 120;
+  if (shape === 'maple') {
+    for (let i = 0; i < N; i++) {
+      const t = i / N * TAU;
+      const lobe = Math.pow(Math.abs(Math.cos(2.5 * (t + Math.PI / 2))), 1.8);
+      const r = (0.3 + 0.7 * lobe) * (1 + 0.05 * Math.sin(34 * t)) * 0.92;
+      pts.push([Math.cos(t) * r, Math.sin(t) * r - 0.02]);
+    }
+    for (let k = 0; k < 5; k++) { const t = -Math.PI / 2 + k * TAU / 5; veins.push([0, 0.22, Math.cos(t) * 0.78, Math.sin(t) * 0.78]); }
+    stem = [0, 0.25, 0, 0.98];
+  } else if (shape === 'oak') {
+    for (let i = 0; i < N; i++) {
+      const t = i / N * TAU;
+      pts.push([Math.cos(t) * 0.40 * (1 + 0.2 * Math.sin(9 * t)), Math.sin(t) * 0.62 * (1 + 0.07 * Math.sin(9 * t)) - 0.08]);
+    }
+    veins.push([0, 0.5, 0, -0.62]);
+    for (const y of [0.3, 0.05, -0.2]) { veins.push([0, y, 0.3, y - 0.22]); veins.push([0, y, -0.3, y - 0.22]); }
+    stem = [0, 0.5, 0, 0.95];
+  } else if (shape === 'ginkgo') {
+    pts.push([0, 0.8]);
+    for (let j = 0; j <= 60; j++) {
+      const a = -0.62 + 1.24 * j / 60;
+      const r = 1.45 * (0.9 + 0.1 * Math.cos(a * 10)) * (1 - 0.28 * Math.exp(-Math.pow(a / 0.08, 2)));
+      pts.push([r * Math.sin(a), 0.8 - r * Math.cos(a)]);
+    }
+    for (const a of [-0.45, -0.22, 0, 0.22, 0.45]) veins.push([0, 0.8, 1.3 * Math.sin(a), 0.8 - 1.3 * Math.cos(a)]);
+    stem = [0, 0.8, 0, 0.98];
+  } else {
+    for (let i = 0; i < N; i++) {
+      const t = i / N * TAU, s = Math.sin(t);
+      const k = 0.15 + 0.85 * (1 + s) / 2;
+      pts.push([Math.cos(t) * 0.5 * k * (1 + 0.04 * Math.sin(40 * t)), s * 0.72 - 0.05]);
+    }
+    veins.push([0, 0.62, 0, -0.7]);
+    for (const y of [0.4, 0.15, -0.1, -0.35]) { veins.push([0, y, 0.26, y - 0.2]); veins.push([0, y, -0.26, y - 0.2]); }
+    stem = [0, 0.65, 0, 0.97];
+  }
+  return { pts, veins, stem };
+}
+function makeSprite(shape, base) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.translate(64, 64); g.scale(60, 60);
+  g.lineJoin = g.lineCap = 'round';
+  const o = outline(shape), dark = '#2a140c';
+  g.strokeStyle = mixHex(base, dark, 0.45); g.lineWidth = 0.05;
+  g.beginPath(); g.moveTo(o.stem[0], o.stem[1]); g.lineTo(o.stem[2], o.stem[3]); g.stroke();
+  g.beginPath();
+  o.pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+  g.closePath();
+  const grd = g.createRadialGradient(0, 0.15, 0.05, 0, 0.05, 1);
+  grd.addColorStop(0, mixHex(base, '#ffe9a8', 0.28));
+  grd.addColorStop(0.7, base);
+  grd.addColorStop(1, mixHex(base, dark, 0.35));
+  g.fillStyle = grd; g.fill();
+  g.strokeStyle = mixHex(base, dark, 0.5); g.lineWidth = 0.025; g.stroke();
+  g.globalAlpha = 0.55; g.lineWidth = 0.022; g.strokeStyle = mixHex(base, dark, 0.45);
+  for (const v of o.veins) { g.beginPath(); g.moveTo(v[0], v[1]); g.lineTo(v[2], v[3]); g.stroke(); }
+  return c;
+}
+for (const shape of SHAPES) for (const col of PALETTE) SPR.push(makeSprite(shape, col));
+
+// drifting leaves behind the start screen
+(function buildDrift() {
+  const box = $('drift');
+  for (let i = 0; i < 18; i++) {
+    const img = new Image();
+    img.src = SPR[(Math.random() * SPR.length) | 0].toDataURL();
+    const sz = rand(26, 74);
+    img.width = img.height = sz;
+    img.style.left = rand(-4, 100) + 'vw';
+    img.style.setProperty('--sx', rand(-18, 18) + 'vw');
+    img.style.setProperty('--dur', rand(16, 30) + 's');
+    img.style.setProperty('--delay', (-rand(0, 28)) + 's');
+    img.alt = '';
+    box.appendChild(img);
+  }
+})();
+
+// ---------------------------------------------------------------- state
+let dpr = 1, W = 0, H = 0;
+let running = false, rafId = 0, frame = 0, lastT = 0, stream = null;
+let cv = { vw: 1280, vh: 720, s: 1, ox: 0, oy: 0 };
+
+let hands = null, face = null, tracking = false, lastFaceFrame = -99;
+let handLM = null, handsReady = false;
+
+let mouthT = null, mouthE = { x: 0, y: 0 };
+let faceBox = null, lastFaceSeen = -1e9;
+const head = { on: false, x: 0, y: 0, hw: 0 };
+
+let actx = null, analyser = null, abuf = null, hasMic = false;
+let floorLevel = null, lastKey = -1e9, spaceDown = false, breathNow = 0;
+
+const leaves = [], embers = [];
+let heights = new Float32Array(1), colW = 8, restCount = 0, airCount = 0, spawnAcc = 0, bornCounter = 0;
+let palmCnt = 0, headCnt = 0;
+
+// hand-derived state
+let handW = 100, cs = { x: 0, y: 0 }, hv = { x: 0, y: 0 }, csInit = false;
+let pinchState = false, pinching = false, prCount = 0, prStart = 0;
+let pp = { x: 0, y: 0 }, pv = { x: 0, y: 0 }, ppInit = false;
+let held = null, sparkMode = false;
+const palm = { on: false, x: 0, y: 0, r: 0 };
+const broom = { on: false, x: 0, y: 0, r: 0 };
+let saveReq = false;
+
+// gust (set once per frame, read per leaf)
+let gOn = false, gx = 0, gy = 0, gR = 1, gR2 = 1, gAcc = 0, _ux = 0, _uy = 0;
+
+// ---------------------------------------------------------------- sizing
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const nw = Math.max(1, Math.round(innerWidth * dpr)), nh = Math.max(1, Math.round(innerHeight * dpr));
+  if (nw === W && nh === H) return;
+  W = nw; H = nh;
+  canvas.width = W; canvas.height = H;
+  colW = 8 * dpr;
+  heights = new Float32Array(Math.ceil(W / colW) + 3);
+  for (let i = leaves.length - 1; i >= 0; i--) {         // the floor moved: let resting leaves fall again
+    const l = leaves[i];
+    if (l.st === REST) { l.st = FALL; l.hc = 0; l.vy = 0; }
+  }
+  restCount = 0;
+  vig.width = W; vig.height = H;
+  const g = vig.getContext('2d');
+  const r = Math.hypot(W, H) / 2;
+  const grad = g.createRadialGradient(W / 2, H / 2, r * 0.45, W / 2, H / 2, r);
+  grad.addColorStop(0, 'rgba(26,8,16,0)');
+  grad.addColorStop(1, 'rgba(26,8,16,0.55)');
+  g.fillStyle = grad; g.fillRect(0, 0, W, H);
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------- camera geometry
+function updateCover() {
+  const vw = cam.videoWidth || 1280, vh = cam.videoHeight || 720;
+  const s = Math.max(W / vw, H / vh);
+  cv = { vw, vh, s, ox: (W - vw * s) / 2, oy: (H - vh * s) / 2 };
+}
+// normalised, un-mirrored video coords -> mirrored canvas pixels
+function toScreen(nx, ny) {
+  return { x: W - (cv.ox + nx * cv.vw * cv.s), y: cv.oy + ny * cv.vh * cv.s };
+}
+function drawCam(g) {
+  g.save();
+  g.translate(W, 0); g.scale(-1, 1);
+  g.drawImage(cam, cv.ox, cv.oy, cv.vw * cv.s, cv.vh * cv.s);
+  g.restore();
+}
+
+// ---------------------------------------------------------------- the floor (pile heightmap)
+function heightAt(x) {
+  const f = clamp(x / colW, 0, heights.length - 2), i = f | 0, t = f - i;
+  return heights[i] * (1 - t) + heights[i + 1] * t;
+}
+const PILE_W = [0.25, 0.6, 1, 0.6, 0.25];
+function addHeight(x, c) {
+  const i = (x / colW) | 0;
+  for (let k = 0; k < 5; k++) {
+    const j = i + k - 2;
+    if (j >= 0 && j < heights.length) heights[j] = Math.max(0, heights[j] + c * PILE_W[k] * 0.5);
+  }
+}
+function clearFloor() {
+  for (let i = leaves.length - 1; i >= 0; i--) if (leaves[i].st === REST) leaves.splice(i, 1);
+  heights.fill(0); restCount = 0;
+}
+
+// ---------------------------------------------------------------- leaves
+function newLeaf(y) {
+  const z = Math.random();
+  const short = Math.min(W, H);
+  return {
+    x: rand(-0.05 * W, 1.05 * W), y,
+    vx: rand(-20, 20) * dpr, vy: rand(20, 60) * dpr, vt: (30 + 45 * z) * dpr * rand(0.8, 1.2),
+    rot: rand(0, TAU), vr: 0, ph: rand(0, TAU), fq: rand(0.8, 1.8), fa: rand(30, 60) * dpr,
+    flip: rand(0, TAU), fs: rand(1.2, 3.2),
+    size: (short * 0.03 + z * short * 0.03) * rand(0.85, 1.15),
+    z, b: z < 0.33 ? 0 : z < 0.66 ? 1 : 2,
+    spr: (Math.random() * SPR.length) | 0,
+    st: FALL, dx: 0, hc: 0, oy: 0, sq: 0.3, rest: 0, born: 0, cd: 0
+  };
+}
+function recycle(l) {
+  const fresh = newLeaf(-60 * dpr);
+  Object.assign(l, fresh);
+}
+function land(l) {
+  l.st = REST; l.vx = l.vy = 0; l.vr = 0;
+  l.oy = rand(-0.2, 0.2) * l.size; l.rot = rand(0, TAU); l.sq = rand(0.22, 0.36);
+  l.born = ++bornCounter;
+  const h = heightAt(l.x);
+  if (h < MAX_PILE * H) { l.hc = l.size * 0.07; addHeight(l.x, l.hc); } else l.hc = 0;
+  l.y = H - h - l.size * 0.04 + l.oy;
+  restCount++;
+  if (restCount > MAX_REST) trimRest();
+}
+function lift(l) {
+  l.st = FALL; addHeight(l.x, -l.hc); l.hc = 0; restCount--;
+  l.flip = rand(0, TAU); l.vy = -rand(20, 80) * dpr;
+}
+function trimRest() {
+  let oldest = null;
+  for (const l of leaves) if (l.st === REST && (!oldest || l.born < oldest.born)) oldest = l;
+  if (!oldest) return;
+  addHeight(oldest.x, -oldest.hc);
+  leaves.splice(leaves.indexOf(oldest), 1);
+  restCount--;
+}
+function release(l, vx, vy) { l.st = FALL; l.vx = vx; l.vy = vy; l.flip = rand(0, TAU); l.cd = 0.7; }   // cd: can't be re-caught for a moment
+
+function gustAt(x, y) {
+  if (!gOn) return 0;
+  const dx = x - gx, dy = y - gy, d2 = dx * dx + dy * dy;
+  if (d2 >= gR2) return 0;
+  const d = Math.sqrt(d2) || 1, f = 1 - d / gR;
+  _ux = dx / d; _uy = dy / d - 0.35;               // outward from the mouth, with a lift
+  return gAcc * f * f;
+}
+function sweepAt(l, dt) {                            // a fist drags leaves along with the hand
+  if (!broom.on) return false;
+  const dx = l.x - broom.x, dy = l.y - broom.y, d2 = dx * dx + dy * dy;
+  if (d2 >= broom.r * broom.r) return false;
+  const f = 1 - Math.sqrt(d2) / broom.r, k = Math.min(1, dt * 10 * f);
+  l.vx += (hv.x - l.vx) * k;
+  l.vy += (hv.y * 0.8 - l.vy) * k;
+  return Math.hypot(hv.x, hv.y) > 150 * dpr;
+}
+
+function updateWorld(dt) {
+  const short = Math.min(W, H);
+  gOn = breathNow > 0;
+  gx = mouthE.x; gy = mouthE.y;
+  gR = (0.42 + 0.28 * breathNow) * short; gR2 = gR * gR;
+  gAcc = GUST_ACC * breathNow * dpr;
+
+  const palmSpeed = Math.hypot(hv.x, hv.y);
+  const tossing = palm.on && palmSpeed > TOSS * handW;
+  let air = 0, affected = 0, ax = 0, pc = 0, hc = 0;
+
+  for (let i = 0; i < leaves.length; i++) {
+    const l = leaves[i];
+    switch (l.st) {
+      case FALL: {
+        air++;
+        l.ph += dt * l.fq * 3; l.flip += dt * l.fs;
+        const flat = 0.6 + 0.4 * Math.abs(Math.sin(l.flip));
+        l.vy += (l.vt * flat - l.vy) * Math.min(1, dt * 1.5);
+        l.vx += Math.sin(l.ph) * l.fa * dt;
+        l.vx -= l.vx * Math.min(1, dt * 0.8);
+        const g = gustAt(l.x, l.y);
+        if (g > 0) { l.vx += _ux * g * dt; l.vy += _uy * g * dt; l.flip += dt * g * 0.004; affected++; ax += l.x; }
+        if (sweepAt(l, dt)) { affected++; ax += l.x; }
+        if (l.cd > 0) l.cd -= dt;
+        if (palm.on && palmCnt < MAX_PALM && l.cd <= 0) { // an open hand draws nearby leaves in
+          const mx = palm.x - l.x, my = palm.y - l.y, md = Math.hypot(mx, my), mr = palm.r * 3.2;
+          if (md < mr && md > 1) {
+            const f = 1 - md / mr, k = f * f * 1400 * dpr;
+            l.vx += mx / md * k * dt; l.vy += my / md * k * dt;
+            l.vx -= l.vx * Math.min(1, dt * 2.2 * f); l.vy -= (l.vy - l.vt) * Math.min(1, dt * 2.2 * f);   // settle instead of overshooting
+          }
+        }
+        l.vr +=((Math.sin(l.ph) * 1.1 + l.vx * 0.012 / dpr) - l.vr) * Math.min(1, dt * 2.5);
+        l.rot += l.vr * dt;
+        l.x += l.vx * dt; l.y += l.vy * dt;
+
+        if (palm.on && palmCnt < MAX_PALM && l.cd <= 0) { // anything touching the palm is caught
+          const dxp = l.x - palm.x, dyp = l.y - palm.y;
+          if (dxp * dxp + dyp * dyp < palm.r * palm.r * 1.3) {
+            l.st = PALM; l.dx = clamp(dxp, -palm.r * 0.9, palm.r * 0.9); l.vx = l.vy = 0; palmCnt++;
+            break;
+          }
+        }
+        if (l.vy > 0) {
+          if (head.on && headCnt < MAX_HEAD) {
+            const dxh = l.x - head.x;
+            if (Math.abs(dxh) < head.hw) {
+              const sy = head.y + (dxh / head.hw) * (dxh / head.hw) * head.hw * 0.35;
+              if (l.y >= sy - 4 * dpr && l.y <= sy + l.vy * dt * 2 + 14 * dpr) {
+                l.st = HEAD; l.dx = dxh; l.vx = l.vy = 0; l.rest = rand(5, 12); headCnt++; break;
+              }
+            }
+          }
+          if (l.y + l.size * 0.15 >= H - heightAt(l.x)) { land(l); break; }
+        }
+        if (l.y > H + 200 * dpr || l.x < -0.3 * W || l.x > 1.3 * W || l.y < -1.2 * H) recycle(l);
+        break;
+      }
+      case REST: {
+        const ty = H - heightAt(l.x) - l.size * 0.04 + l.oy;
+        l.y += (ty - l.y) * Math.min(1, dt * 6);
+        const g = gustAt(l.x, l.y);
+        if (g > 220 * dpr) {
+          lift(l); l.vx = _ux * g * 0.35; l.vy = _uy * g * 0.35; affected++; ax += l.x;
+        } else if (broom.on) {
+          const dx = l.x - broom.x, dy = l.y - broom.y;
+          if (dx * dx + dy * dy < broom.r * broom.r && Math.hypot(hv.x, hv.y) > 150 * dpr) {
+            lift(l); l.vx = hv.x * 0.9; l.vy = hv.y * 0.6 - 60 * dpr; affected++; ax += l.x;
+          }
+        }
+        break;
+      }
+      case HELD: {
+        const k = Math.min(1, dt * 18);
+        l.x += (pp.x - l.x) * k; l.y += (pp.y - l.y) * k;
+        l.rot += dt * 0.8;
+        break;
+      }
+      case PALM: {
+        if (!palm.on) { release(l, hv.x * 0.5, 0); break; }
+        if (tossing) { release(l, hv.x * 1.0 + rand(-60, 60) * dpr, hv.y * 1.0 - 150 * dpr); break; }
+        l.dx += rand(-8, 8) * dpr * dt;
+        if (Math.abs(l.dx) >= palm.r) { release(l, Math.sign(l.dx) * 50 * dpr, 20 * dpr); break; }
+        const k = Math.min(1, dt * 16);                  // glide onto the palm rather than teleport
+        l.x += (palm.x + l.dx - l.x) * k;
+        l.y += (palm.y - 0.5 * Math.sqrt(palm.r * palm.r - l.dx * l.dx) - l.size * 0.12 - l.y) * k;
+        l.rot += (0 - Math.sin(l.rot)) * dt * 2;
+        pc++;
+        break;
+      }
+      case HEAD: {
+        l.rest -= dt;
+        if (!head.on || l.rest <= 0) { release(l, rand(-70, 70) * dpr, 10 * dpr); break; }
+        if (Math.abs(l.dx) > head.hw) l.dx = Math.sign(l.dx) * head.hw;
+        l.x = head.x + l.dx;
+        l.y = head.y + (l.dx / head.hw) * (l.dx / head.hw) * head.hw * 0.35 - l.size * 0.1;
+        hc++;
+        break;
+      }
+    }
+  }
+  palmCnt = pc; headCnt = hc; airCount = air;
+
+  // keep roughly the chosen number of leaves aloft
+  const target = +sizeEl.value * PER_STEP;
+  const need = target - air;
+  if (need > 0 && leaves.length < MAX_LEAVES) {
+    spawnAcc += dt * (3 + need * 0.12);
+    while (spawnAcc >= 1) { spawnAcc--; leaves.push(newLeaf(-60 * dpr)); }
+  }
+
+  // embers from a pinch that found no leaf
+  if (pinching && sparkMode) {
+    const sp = Math.hypot(pv.x, pv.y);
+    if (sp > 60 * dpr) {
+      const n = 1 + Math.min(3, (sp / (400 * dpr)) | 0);
+      for (let i = 0; i < n && embers.length < 220; i++) {
+        embers.push({ x: pp.x + rand(-4, 4) * dpr, y: pp.y + rand(-4, 4) * dpr, vx: rand(-30, 30) * dpr + pv.x * 0.08, vy: rand(-50, 10) * dpr, life: 0, max: rand(0.7, 1.5), sz: rand(1.5, 3.4) * dpr });
+      }
+    }
+  }
+  for (let i = embers.length - 1; i >= 0; i--) {
+    const e = embers[i];
+    e.life += dt;
+    if (e.life >= e.max) { embers.splice(i, 1); continue; }
+    e.vy += 110 * dpr * dt; e.vx *= 1 - dt * 0.8;
+    e.x += e.vx * dt; e.y += e.vy * dt;
+  }
+}
+
+// ---------------------------------------------------------------- hand interpretation
+function pickLeaf(p, reach) {
+  let best = null, bd = reach;
+  for (const l of leaves) {
+    if (l.st === HELD) continue;
+    const d = Math.hypot(l.x - p.x, l.y - p.y);
+    if (d < bd) { bd = d; best = l; }
+  }
+  return best;
+}
+function dropHeld() {
+  if (held) { release(held, pv.x * 0.9, pv.y * 0.9); held = null; }
+  sparkMode = false;
+}
+function pinchRelease(now) {
+  if (!pinching) return;
+  if (!prStart) prStart = now;
+  prCount++;
+  if (prCount >= 2 && now - prStart >= 120) { pinching = false; prCount = 0; prStart = 0; dropHeld(); }
+}
+let gesture = '', palmSeen = -1e9;
+function setGesture(g) { if (handsReady && g !== gesture) { gesture = g; setStatus(g); } }
+
+function handLost(now) {
+  setGesture('no hand — hold one up');
+  pinchState = false; palm.on = false; broom.on = false; csInit = false; palmSeen = -1e9;
+  hv.x = hv.y = 0;
+  pinchRelease(now);
+}
+
+function updateHand(now, dt) {
+  const lm = handLM;
+  if (!lm) { handLost(now); return; }
+  const P = i => toScreen(lm[i].x, lm[i].y);
+  const w = P(0), m9 = P(9), th = P(4), ix = P(8);
+  const curled = (tip, pip) => dist(w, P(tip)) < dist(w, P(pip));
+  const c = [curled(8, 6), curled(12, 10), curled(16, 14), curled(20, 18)];
+  const fist = c[0] && c[1] && c[2] && c[3];
+  const extended = c.filter(v => !v).length;
+  const ratio = dist(th, ix) / (dist(w, m9) || 1);   // pinch measured against hand size
+  handW = Math.max(dist(P(5), P(17)), dist(w, m9));
+
+  // palm centre and its velocity
+  const cx = (w.x + P(5).x + m9.x + P(13).x + P(17).x) / 5, cy = (w.y + P(5).y + m9.y + P(13).y + P(17).y) / 5;
+  if (!csInit) { cs = { x: cx, y: cy }; csInit = true; hv.x = hv.y = 0; }
+  else {
+    const px = cs.x, py = cs.y;
+    cs.x += (cx - cs.x) * 0.5; cs.y += (cy - cs.y) * 0.5;
+    hv.x += ((cs.x - px) / dt - hv.x) * 0.35; hv.y += ((cs.y - py) / dt - hv.y) * 0.35;
+  }
+
+  if (ratio < PINCH_DOWN) pinchState = true;
+  else if (ratio > PINCH_UP) pinchState = false;
+
+  if (fist) {
+    setGesture('fist · sweeping');
+    pinchState = false; palm.on = false; palmSeen = -1e9;
+    if (pinching) { pinching = false; prCount = 0; prStart = 0; dropHeld(); }
+    broom.on = true; broom.x = cs.x; broom.y = cs.y; broom.r = 1.4 * handW;
+    return;
+  }
+  broom.on = false;
+
+  // open palm: three or more fingers extended and not pinching
+  if (!pinchState && extended >= 3) palmSeen = now;
+  palm.on = !pinchState && now - palmSeen < 200;     // 200ms grace so one bad frame doesn't drop the palm
+  if (palm.on) { palm.x = cs.x; palm.y = cs.y; palm.r = 1.0 * handW; }
+  setGesture(pinchState ? (held ? 'pinch · holding a leaf' : 'pinch') : palm.on ? 'open palm · catching' : 'hand seen — open it flat to catch');
+
+  // the index must be extended as the pinch starts, never mid-pinch
+  if (pinchState && (pinching || !c[0])) {
+    const tx = (th.x + ix.x) / 2, ty = (th.y + ix.y) / 2;
+    if (!ppInit) { pp = { x: tx, y: ty }; ppInit = true; }
+    const px = pp.x, py = pp.y;
+    pp.x += (tx - pp.x) * 0.55; pp.y += (ty - pp.y) * 0.55;
+    pv.x += ((pp.x - px) / dt - pv.x) * 0.35; pv.y += ((pp.y - py) / dt - pv.y) * 0.35;
+    if (!pinching) {
+      pinching = true;
+      held = pickLeaf(pp, Math.max(46 * dpr, 0.9 * handW));
+      if (held) {
+        if (held.st === REST) { addHeight(held.x, -held.hc); held.hc = 0; restCount--; }
+        held.st = HELD;
+      } else sparkMode = true;
+    }
+    prCount = 0; prStart = 0;
+  } else {
+    pinchRelease(now);
+  }
+}
+
+// ---------------------------------------------------------------- audio / breath
+function readBreath(now) {
+  if (!analyser) return 0;
+  analyser.getFloatTimeDomainData(abuf);
+  let s = 0;
+  for (let i = 0; i < abuf.length; i++) s += abuf[i] * abuf[i];
+  const level = Math.sqrt(s / abuf.length);
+  if (floorLevel === null) floorLevel = level;
+  // the floor falls fast and rises slowly, so one quiet moment cannot pin it
+  if (level < floorLevel) floorLevel += (level - floorLevel) * 0.05;
+  else floorLevel += (level - floorLevel) * 0.0008;
+  if (now - lastKey < 300) return 0;              // typing is not breathing
+  const over = level - floorLevel;
+  if (over <= 0.0025) return 0;
+  return Math.min(1, over / 0.003);
+}
+
+// ---------------------------------------------------------------- render
+function drawLeaf(l) {
+  let sx = l.size / 64, sy, a = 1;
+  if (l.st === FALL) { const cf = Math.abs(Math.cos(l.flip)); sy = sx * (0.18 + 0.82 * cf); a = 0.78 + 0.22 * cf; }
+  else if (l.st === HELD) { sx *= 1.15; sy = sx; }
+  else if (l.st === REST) sy = sx * l.sq;
+  else sy = sx * 0.45;
+  const cr = Math.cos(l.rot), sr = Math.sin(l.rot);
+  ctx.globalAlpha = a;
+  ctx.setTransform(cr * sx, sr * sx, -sr * sy, cr * sy, l.x, l.y);
+  ctx.drawImage(SPR[l.spr], -64, -64);
+}
+function drawLeaves() {
+  for (let pass = 0; pass < 4; pass++) {
+    for (let i = 0; i < leaves.length; i++) {
+      const l = leaves[i];
+      const p = (l.st === FALL || l.st === REST) ? l.b : 3;
+      if (p !== pass) continue;
+      if (l.st === HELD) {                             // a warm glow marks the leaf in your fingers
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'lighter';
+        const g = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.size * 1.5);
+        g.addColorStop(0, 'rgba(255,190,90,0.38)'); g.addColorStop(1, 'rgba(255,190,90,0)');
+        ctx.fillStyle = g; ctx.fillRect(l.x - l.size * 1.5, l.y - l.size * 1.5, l.size * 3, l.size * 3);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      drawLeaf(l);
+    }
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+}
+function drawEmbers() {
+  if (!embers.length) return;
+  ctx.globalCompositeOperation = 'lighter';
+  for (const e of embers) {
+    const k = 1 - e.life / e.max, r = e.sz * (1 + 2 * k);
+    const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r * 2.4);
+    g.addColorStop(0, 'rgba(255,196,110,' + (0.9 * k) + ')');
+    g.addColorStop(1, 'rgba(228,87,46,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(e.x - r * 2.4, e.y - r * 2.4, r * 4.8, r * 4.8);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+function drawPalm() {                                // a faint warm pool under an open hand: it is being seen
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(palm.x, palm.y, 0, palm.x, palm.y, palm.r * 1.3);
+  g.addColorStop(0, 'rgba(255,190,90,0.22)'); g.addColorStop(1, 'rgba(255,190,90,0)');
+  ctx.fillStyle = g; ctx.fillRect(palm.x - palm.r * 1.3, palm.y - palm.r * 1.3, palm.r * 2.6, palm.r * 2.6);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(255,236,205,0.28)'; ctx.lineWidth = 1.5 * dpr;
+  ctx.beginPath(); ctx.arc(palm.x, palm.y, palm.r, 0, TAU); ctx.stroke();
+}
+function drawRing() {
+  ctx.strokeStyle = 'rgba(255,236,205,0.32)';
+  ctx.lineWidth = 1.5 * dpr;
+  ctx.beginPath(); ctx.arc(broom.x, broom.y, broom.r, 0, TAU); ctx.stroke();
+}
+function savePNG() {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'windfall-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+}
+
+async function track() {
+  tracking = true;
+  try {
+    if (frame - lastFaceFrame >= 5) { lastFaceFrame = frame; await face.send({ image: cam }); }
+    await hands.send({ image: cam });       // next send only after this one resolves
+  } finally { tracking = false; }
+}
+
+function loop(now) {
+  if (!running) return;
+  rafId = requestAnimationFrame(loop);
+  if (cam.readyState < 2 || !cam.videoWidth) return;
+  const dt = clamp((now - lastT) / 1000 || 0.016, 0.001, 0.05);
+  lastT = now;
+  frame++;
+  updateCover();
+  if (!tracking) track();
+
+  // mouth: where the gust leaves from, trailing the face rather than snapping to it
+  const home = mouthT || { x: W / 2, y: H * 0.55 };
+  mouthE.x += (home.x - mouthE.x) * EASE_FACE;
+  mouthE.y += (home.y - mouthE.y) * EASE_FACE;
+
+  // head: a light platform on top of the face box
+  if (faceBox && now - lastFaceSeen < 900) {
+    const t = head.on ? 0.3 : 1;
+    head.x += (faceBox.x - head.x) * t; head.y += (faceBox.top - head.y) * t; head.hw += (faceBox.hw - head.hw) * t;
+    head.on = true;
+  } else head.on = false;
+
+  updateHand(now, dt);
+
+  breathNow = spaceDown ? 1 : readBreath(now);
+  dotEl.style.opacity = breathNow > 0 ? 0.95 : 0.2;
+
+  updateWorld(dt);
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  if (HAS_FILTER) ctx.filter = GRADE;
+  drawCam(ctx);
+  ctx.filter = 'none';
+  ctx.fillStyle = WASH; ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(vig, 0, 0);
+  if (palm.on) drawPalm();
+  drawLeaves();
+  drawEmbers();
+  if (saveReq) { saveReq = false; savePNG(); }
+  if (broom.on) drawRing();
+}
+
+// ---------------------------------------------------------------- models
+function makeModels() {
+  if (hands) return;
+  hands = new Hands({ locateFile: f => HANDS_BASE + f });
+  hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.5 });
+  hands.onResults(r => {
+    handLM = (r.multiHandLandmarks && r.multiHandLandmarks[0]) || null;
+    if (!handsReady) { handsReady = true; setStatus(hasMic ? 'ready — blow on the leaves' : 'no microphone — hold space for a gust'); }
+  });
+  face = new FaceDetection({ locateFile: f => FACE_BASE + f });
+  face.setOptions({ model: 'short', minDetectionConfidence: 0.5 });
+  face.onResults(r => {
+    const d = r.detections && r.detections[0];
+    if (!d) return;
+    const b = d.boundingBox;
+    if (d.landmarks && d.landmarks[3]) mouthT = toScreen(d.landmarks[3].x, d.landmarks[3].y);   // keypoint 3 = mouth
+    else mouthT = toScreen(b.xCenter, b.yCenter + b.height * 0.3);
+    const c = toScreen(b.xCenter, b.yCenter);
+    const wpx = b.width * cv.vw * cv.s, hpx = b.height * cv.vh * cv.s;
+    faceBox = { x: c.x, top: c.y - hpx / 2 - hpx * 0.12, hw: wpx * 0.45 };
+    lastFaceSeen = performance.now();
+  });
+}
+function setStatus(t) { statusEl.textContent = t; }
+
+// ---------------------------------------------------------------- start / stop
+function showError(msg) { errEl.textContent = msg; errEl.hidden = false; goBtn.disabled = false; }
+function describe(e) {
+  if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError' || e.name === 'PermissionDeniedError'))
+    return 'The camera was refused. Allow camera and microphone for this page (look for the icon in the address bar), then press the button again.';
+  if (e && (e.name === 'NotFoundError' || e.name === 'OverconstrainedError'))
+    return 'No camera was found on this device.';
+  if (e && e.name === 'NotReadableError')
+    return 'The camera is in use by another app. Close it and try again.';
+  return 'The camera could not be started: ' + (e && e.message ? e.message : e);
+}
+
+async function begin() {
+  errEl.hidden = true; goBtn.disabled = true;
+  if (location.protocol === 'file:') {
+    return showError('Browsers block the camera on file:// pages. Serve this folder instead, e.g. run "python3 -m http.server 8000" here and open http://localhost:8000/windfall.html');
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return showError('This page needs https or localhost to reach the camera.');
+  }
+  if (typeof Hands === 'undefined' || typeof FaceDetection === 'undefined') {
+    return showError('The hand and face models could not be downloaded from the CDN. Check your connection and reload.');
+  }
+  const video = { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' };
+  // noise suppression is built to delete the sound of breathing; turn all three off
+  const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video, audio });
+    hasMic = true;
+  } catch (e1) {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video });
+      hasMic = false;
+    } catch (e2) {
+      return showError(describe(e2));
+    }
+  }
+  cam.srcObject = stream;
+  await cam.play();
+
+  // the mic is analysed for breath only; nothing is played
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  await actx.resume();
+  if (hasMic && stream.getAudioTracks().length) {
+    analyser = actx.createAnalyser();
+    analyser.fftSize = 1024;
+    abuf = new Float32Array(analyser.fftSize);
+    actx.createMediaStreamSource(stream).connect(analyser);   // analysed only, never played back
+  } else { hasMic = false; }
+
+  makeModels();
+  resize();
+  floorLevel = null;
+  mouthT = null; faceBox = null; handLM = null; head.on = false;
+  mouthE = { x: W / 2, y: H * 0.55 };
+  held = null; pinchState = pinching = sparkMode = false; palm.on = broom.on = false; csInit = ppInit = false;
+  leaves.length = 0; embers.length = 0; heights.fill(0); restCount = 0;
+  const target = +sizeEl.value * PER_STEP;
+  for (let i = 0; i < target * 0.6; i++) leaves.push(newLeaf(rand(-0.1, 1) * H));   // already mid-fall when you arrive
+  setStatus(handsReady ? (hasMic ? 'ready — blow on the leaves' : 'no microphone — hold space for a gust') : 'loading the hand model…');
+
+  startEl.hidden = true; hud.hidden = false; leavesEl.hidden = false; shutter.hidden = false;
+  goBtn.disabled = false;
+  running = true; frame = 0; lastT = performance.now();
+  rafId = requestAnimationFrame(loop);
+}
+
+function stop() {
+  running = false; cancelAnimationFrame(rafId);
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null; cam.srcObject = null;
+  if (actx) actx.close();
+  actx = analyser = null; hasMic = false; spaceDown = false;
+  held = null; pinching = false;
+  hud.hidden = leavesEl.hidden = shutter.hidden = 
+  startEl.hidden = false;
+}
+
+// ---------------------------------------------------------------- input
+goBtn.addEventListener('click', begin);
+shutter.addEventListener('click', () => { saveReq = true; });
+addEventListener('keydown', e => {
+  lastKey = performance.now();
+  if (!running) return;
+  if (e.code === 'Space') { e.preventDefault(); spaceDown = true; }
+  else if (e.code === 'KeyC') clearFloor();
+  else if (e.code === 'KeyS') saveReq = true;
+  else if (e.code === 'Escape') stop();
+});
+addEventListener('keyup', e => {
+  if (e.code === 'Space') { if (running) e.preventDefault(); spaceDown = false; }
+});
+addEventListener('blur', () => { spaceDown = false; });
+</script>
+</body>
+</html>
